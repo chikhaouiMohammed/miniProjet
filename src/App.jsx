@@ -37,7 +37,7 @@ function App() {
   return (
     <div>
       <Routes>
-        <Route path="/" element={<Landing/>} />
+        <Route path="/" element={<HotelOwner/>} />
         <Route path="/login" element={<SignIn/>} />
         <Route path="/register" element={<SignUp/>} />
       </Routes>

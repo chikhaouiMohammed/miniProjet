@@ -8,7 +8,7 @@ import logo from '../../images/Home/Footer/Logo.png'
 function Footer() {
   return (
     <footer className=" container mx-auto px-[40px] font-poppins py-[100px] text-[#5E6282] font-medium">
-        <div className='flex justify-center gap-[83px] items-center'>
+        <div className='flex justify-between items-center'>
             {/* logo */}
             <div className=' flex flex-col justify-center gap-10 items-center'>
                 <div><img src={logo} alt="" /></div>

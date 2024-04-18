@@ -25,14 +25,11 @@ function HotelOwner() {
     <div className=' font-poppins'>
         
         <header className='w-full px-[100px] py-[20px] flex justify-between items-center mb-[74px] box-shadow'>
-          <div className="navbar bg-base-100">
+          <div className="navbar bg-transparent">
             <div className="flex-1">
               <a className="btn btn-ghost text-xl">StayDz</a>
             </div>
             <div className="flex-none gap-2">
-              <div className="form-control">
-                <input type="text" placeholder="Search" className="input input-bordered w-24 md:w-auto" />
-              </div>
               <div className="dropdown dropdown-end">
                 <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                   <div className="w-10 rounded-full">
