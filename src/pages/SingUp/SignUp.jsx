@@ -1,4 +1,6 @@
-import React from 'react'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom';
+import {  createUserWithEmailAndPassword } from 'firebase/auth';
 import imglogin1 from '../../assets/25f3792bb151520d1ae87926e8e6633a 1.png'
 import { FcGoogle } from "react-icons/fc";
 import { TfiEmail } from "react-icons/tfi";
@@ -6,11 +8,71 @@ import { RiLockPasswordLine } from "react-icons/ri";
 import { CiUser } from "react-icons/ci";
 import iconfcb from '../../assets/icons8-facebook-nouveau-64.png'
 import { Link } from 'react-router-dom';
+import { hotelOwnerRoute, hotelSearchRoute } from '../../Routes';
+import './style.css'
+import { auth } from '../../Data/Firebase';
 
 
 const SignUp = () => {
+
+  const [userType, setUserType] = useState('client');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmedPassword, setConfirmedPassword] = useState('');
+  const [registered, setRegistered] = useState(false);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  console.log(password)
+  
+  const handleUserTypeChange = (value) => {
+    setUserType(value);
+  };
+  const handleEmailChange = (event) => {
+    setEmail(event.target.value); 
+  };
+
+  const handlePasswordChange = (event) => {
+    setPassword(event.target.value); 
+  };
+  const handleConfirmedPassword = (event) => {
+    setConfirmedPassword(event.target.value); 
+  };
+
+  const handleSignUp = async () => {
+    if (password === confirmedPassword) {
+      setLoading(true);
+      try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        if (userType === 'client') {
+          navigate(hotelSearchRoute);
+        } else if (userType === 'hotelOwner') {
+          navigate(hotelOwnerRoute); 
+        }
+        setRegistered(true);
+      } catch (error) {
+        console.error('Error signing up:', error.message);
+        setError(true);
+      } finally {
+        setLoading(false); // Set loading state to false
+      }
+    } else {
+      setError(true);
+    }
+  };
+  const handleCloseAlert = () => {
+    const alert = document.querySelector('.alert');
+    alert.classList.add('fade-out'); // Add fade-out class to trigger the transition
+  }
+  
+
+  
   return (
-    <div className=' w-full h-screen flex items-start'>
+    <div>
+        
+        <div className=' w-full h-screen flex items-start'>
+      
       <div className='relative w-1/2 h-full flex flex-col'>
       <img className=' h-full w-full object-cover' src={imglogin1} alt="" />
       </div>
@@ -35,6 +97,7 @@ const SignUp = () => {
           id="email"
           placeholder='Enter Your Email Address'
           className='w-full text-black py-3 pl-7 my-3 border-b border-[#FF432A] outline-none focus:outline-none bg-none'
+          onChange={handleEmailChange}
           /> 
         </div>
         <div className='relative'>
@@ -61,24 +124,61 @@ const SignUp = () => {
           <input type="password"
           placeholder=' Entrer Your Password'
           className='w-full text-black py-3 pl-5 my-3 border-b border-black outline-none focus:outline-none bg-none'
+          onChange={handlePasswordChange}
           />
         </div>
         <div className='relative'>
           <label  htmlFor="email">Confirm Password</label>
           <RiLockPasswordLine className='absolute bottom-7'/>
           <input type="password" 
-          
+          onChange={handleConfirmedPassword}
           placeholder='Confirm Your Password'
           className='w-full text-black py-3 pl-6 my-3 border-b border-black outline-none focus:outline-none bg-none'
           /> 
         </div>
       </div>
+      <div className='text-black font-semibold'>
+        <div className="form-control">
+          <label className="label cursor-pointer">
+            <span className="label-text">Are you looking to book a room with us?</span> 
+            <input type="radio" name="radio-10" className="radio checked:bg-red-500" checked={userType === 'client'}  onChange={() => handleUserTypeChange('client')}
+  />
+          </label>
+        </div>
+        <div className="form-control">
+          <label className="label cursor-pointer">
+            <span className="label-text">Are you managing a hotel with us?</span> 
+            <input type="radio" name="radio-10" className="radio checked:bg-blue-500" checked={userType === 'hotelOwner'}  onChange={() => handleUserTypeChange('hotelOwner')}
+  />
+          </label>
+        </div>
+      </div>
       
         <div className='w-full flex flex-col mt-7 pt-7'>
-          <button className='w-full my-1 bg-mainColor rounded-3xl shadow p-4 text-center text-white flex items-center justify-center font-medium '>Register</button>
+          <button className='w-full my-1 bg-mainColor rounded-3xl shadow p-4 text-center text-white flex items-center justify-center font-medium ' onClick={handleSignUp}>Register</button>
         </div>
     </div>
     </div>
+        </div>
+        {loading && (
+                <div className="loader-container">
+                    <div className="loader"></div>
+                </div>
+            )}
+            {registered && (
+          <div role="alert" className="alert alert-success">
+            <svg xmlns="http://www.w3.org/2000/svg" className="cursor-pointer stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            <span>Youve been registered successfully!</span>
+          </div>
+        )}
+        {error && (
+          <div role="alert" className="alert alert-error w-[500px] ml-[20%]">
+            <svg onClick={handleCloseAlert} xmlns="http://www.w3.org/2000/svg" className="cursor-pointer stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Check the information again !</span>
+          </div>
+        )}
     </div>
   )
 }
