@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Admin from "./pages/AdminDashboard/Admin";
 import { adminData } from "./Data/AdminLineChart";
 import HotelSearch from "./pages/HotelSearch/HotelSearch";
@@ -12,7 +12,8 @@ import User from "./pages/UserAccount/User";
 import ChangePAssword from './components/ChangePassword'
 import UserInfo from './components/UserInfo'
 import Secretaire from './pages/SecretairePage.jsx/Secretaire'
-import { Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AuthContext } from "./context/AuthContext";
 
 
 
@@ -31,16 +32,25 @@ function App() {
     }]
   }
   );
-  
+
+  const {currentUser} = useContext(AuthContext)
+
+  const RequireAuth = ({ children }) => {
+    return currentUser ? children : <Navigate to="/login" />;
+  };
   
 
   return (
     <div>
-      <Routes>
-        <Route path="/" element={<Landing/>} />
-        <Route path="/login" element={<SignIn/>} />
-        <Route path="/register" element={<SignUp/>} />
-      </Routes>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Landing/>} />
+          <Route path="/login" element={<SignIn/>} />
+          <Route path="/register" element={<SignUp/>} />
+          <Route path="/hotel-search" index element={<RequireAuth><HotelSearch/></RequireAuth>} />
+          <Route path="/hotel-owner" index element={<RequireAuth><HotelOwner/></RequireAuth>} />
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }

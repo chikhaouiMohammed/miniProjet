@@ -10,13 +10,17 @@ import iconfcb from '../../assets/icons8-facebook-nouveau-64.png'
 import { Link } from 'react-router-dom';
 import { hotelOwnerRoute, hotelSearchRoute } from '../../Routes';
 import './style.css'
-import { auth } from '../../Data/Firebase';
+import { auth, db } from '../../Data/Firebase';
+import { doc, setDoc } from 'firebase/firestore';
+
 
 
 const SignUp = () => {
 
-  const [userType, setUserType] = useState('client');
+  const [userType, setUserType] = useState('guest');
   const [email, setEmail] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmedPassword, setConfirmedPassword] = useState('');
   const [registered, setRegistered] = useState(false);
@@ -32,6 +36,12 @@ const SignUp = () => {
   const handleEmailChange = (event) => {
     setEmail(event.target.value); 
   };
+  const handleFirstName = (event) => {
+    setFirstName(event.target.value); 
+  };
+  const handleLastName = (event) => {
+    setLastName(event.target.value); 
+  };
 
   const handlePasswordChange = (event) => {
     setPassword(event.target.value); 
@@ -45,26 +55,36 @@ const SignUp = () => {
       setLoading(true);
       try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        if (userType === 'client') {
+        if (userType === 'guest') {
+          await setDoc(doc(db, "guestUsers", email), {
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            password: password
+          });
           navigate(hotelSearchRoute);
         } else if (userType === 'hotelOwner') {
+          await setDoc(doc(db, "hotelUsers", email), {
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            password: password
+          });
           navigate(hotelOwnerRoute); 
         }
         setRegistered(true);
       } catch (error) {
-        console.error('Error signing up:', error.message);
-        setError(true);
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        alert(errorMessage)
       } finally {
-        setLoading(false); // Set loading state to false
+        setLoading(false);
       }
     } else {
       setError(true);
     }
   };
-  const handleCloseAlert = () => {
-    const alert = document.querySelector('.alert');
-    alert.classList.add('fade-out'); // Add fade-out class to trigger the transition
-  }
+ 
   
 
   
@@ -104,7 +124,7 @@ const SignUp = () => {
           <label  htmlFor="email">First Name</label>
           <CiUser className='absolute bottom-7'/>
           <input type="text" 
-          
+          onChange={handleFirstName}
           placeholder='Enter Your First Name'
           className='w-full text-black py-3 pl-6 my-3 border-b border-black outline-none focus:outline-none bg-none'
           /> 
@@ -113,7 +133,7 @@ const SignUp = () => {
           <label  htmlFor="email">Last Name</label>
           <CiUser className='absolute bottom-7'/>
           <input type="text" 
-        
+          onChange={handleLastName}
           placeholder='Enter Your Last Name'
           className='w-full text-black py-3 pl-6 my-3 border-b border-black outline-none focus:outline-none bg-none'
           /> 
@@ -141,7 +161,7 @@ const SignUp = () => {
         <div className="form-control">
           <label className="label cursor-pointer">
             <span className="label-text">Are you looking to book a room with us?</span> 
-            <input type="radio" name="radio-10" className="radio checked:bg-red-500" checked={userType === 'client'}  onChange={() => handleUserTypeChange('client')}
+            <input type="radio" name="radio-10" className="radio checked:bg-red-500" checked={userType === 'guest'}  onChange={() => handleUserTypeChange('guest')}
   />
           </label>
         </div>
@@ -162,21 +182,13 @@ const SignUp = () => {
         </div>
         {loading && (
                 <div className="loader-container">
-                    <div className="loader"></div>
+                    <div className="loader"></div>                                                                                
                 </div>
             )}
             {registered && (
           <div role="alert" className="alert alert-success">
             <svg xmlns="http://www.w3.org/2000/svg" className="cursor-pointer stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <span>Youve been registered successfully!</span>
-          </div>
-        )}
-        {error && (
-          <div role="alert" className="alert alert-error w-[500px] ml-[20%]">
-            <svg onClick={handleCloseAlert} xmlns="http://www.w3.org/2000/svg" className="cursor-pointer stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span>Check the information again !</span>
           </div>
         )}
     </div>
