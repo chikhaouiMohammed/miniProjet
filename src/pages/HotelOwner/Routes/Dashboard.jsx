@@ -1,8 +1,11 @@
 
 import { Line } from "react-chartjs-2";
 import { Chart as ChartJS } from "chart.js/auto";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { hotelTotalRevenue } from "../../../Data/HotelOwnerData";
+import { db } from "../../../Data/Firebase";
+import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { AuthContext } from "../../../context/AuthContext";
 
 function Dashboard() {
     const [revenue, setRevenue] = useState({
@@ -37,6 +40,30 @@ function Dashboard() {
           }
         }
       };
+      const { currentUser } = useContext(AuthContext);
+      const email = currentUser.email
+      console.log(email)
+
+      useEffect(() => {
+        const handleData = async () => {
+            const hotelsCollectionRef = collection(db, 'hotelList', 'Tlemcen', 'hotels');
+            const querySnapshot = await getDocs(query(hotelsCollectionRef, where('email', '==', email)));
+    
+            if (!querySnapshot.empty) {
+                // Loop through the documents if needed
+                querySnapshot.forEach(doc => {
+                    console.log(doc.id, ' => ', doc.data());
+                });
+            } else {
+                console.log("No documents found");
+            }
+        };
+        handleData();
+    }, [email]);
+    
+      
+      
+
   return (
       <div className='bg-[#F8F8F8] w-full p-5'>
             {/* the date */}
@@ -138,7 +165,7 @@ function Dashboard() {
             <h2 className='text-3xl font-semibold mb-10'>Total Revenue</h2>
                     <Line style={{width:"98%"}} data={revenue} options={options}/>
             </div>
-          </div>
+      </div>
   )
 }
 

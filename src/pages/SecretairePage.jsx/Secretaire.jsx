@@ -9,7 +9,10 @@ import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import KeyboardArrowUpOutlinedIcon from "@mui/icons-material/KeyboardArrowUpOutlined";
 import { DataGrid } from '@mui/x-data-grid';
-import { userColumns, userRows } from "../../Data/datatablesource";
+import { userColumns } from "../../Data/datatablesource";
+import { Link } from "react-router-dom";
+import {collection,getDocs,deleteDoc,doc} from "firebase/firestore";
+import { db } from "../../Data/Firebase";
 const Secretaire = () => {
 
     const [language, setLanguage] = useState('EN');
@@ -18,11 +21,18 @@ const Secretaire = () => {
     const handleChange = (value) => {
         setLanguage(value);
     };
-    const [data, setData] = useState(userRows);
+    const [data, setData] = useState([]);
 
-    const handleDelete = (id) => {
-      setData(data.filter((item) => item.id !== id));
+    const handleDelete = async (id) => {
+      try {
+        await deleteDoc(doc(db, "users", id));
+        setData(data.filter((item) => item.id !== id));
+      } catch (err) {
+        console.log(err);
+      }
     };
+
+
     const actionColumn = [
       {
         field: "action",
@@ -42,49 +52,70 @@ const Secretaire = () => {
         },
       },
     ];
+   const fetchData = async () => {
+         let list = [];
+         try {
+           const querySnapshot = await getDocs(collection(db, "users"));
+           querySnapshot.forEach((doc) => {
+             list.push({ id: doc.id, ...doc.data() });
+           });
+           setData(list);
+         console.log(list);
+       } catch (err) {
+          console.log(err);
+        }
+       };
+       fetchData();
 
+/*const fetchData = async () => {
+  let list = [];
+  try {
+    // Fetch data from the "hotelliste/tlemcen/hotels" collection
+    const querySnapshot = await getDocs(collection(db, "hotelliste", "tlemcen", "hotels"));
+    querySnapshot.forEach((doc) => {
+      // Access the reservation field inside each document
+      const reservations = doc.data().reservation;
+      // Push each reservation's user email to the list
+      reservations.forEach((reservation) => {
+        list.push(reservation.useremail);
+      });
+    });
+    setData(list);
+    console.log(list);
+  } catch (err) {
+    console.log(err);
+  }
+};
+fetchData();
+*/
   return (
     
     <div className=' container mx-auto font-poppins'>
-      <header className='py-[50px] flex justify-between items-center mb-[100px]'>
-      {/* Logo */}
-      <div className=' text-xl font-bold cursor-pointer'>Logo</div>
-      {/* nav */}
-      <nav className='flex justify-center items-center gap-5'>
-          {/* languages */}
-          <div className="dropdown">
-              <div onMouseEnter={()=>{setarrowStatus(true)}} onMouseOut={()=>{setarrowStatus(false)}}>
-                  <button  className="dropbtn">{language}</button>
-                  <div className="dropdown-content">
-                      <div className=' flex justify-center items-center'>
-                          <a onClick={() => handleChange("EN")} href="#">English</a>
-                          <div className=' cursor-pointer' onClick={() => handleChange("EN")}> <ReactCountryFlag style={{width:"50px", height:"25px", borderRadius:"15px"}} countryCode="US" svg /></div>
-                      </div>
-                      <div className=' flex justify-center items-center'>
-                          <a onClick={() => handleChange("FR")} href="#">French</a>
-                          <div className=' cursor-pointer' onClick={() => handleChange("FR")}> <ReactCountryFlag style={{width:"50px", height:"25px", borderRadius:"15px"}} countryCode="FR" svg /></div>
-                      </div>
-                      <div className=' flex justify-center items-center'>
-                          <a onClick={() => handleChange("AR")} href="#">Arabic</a>
-                          <div className=' cursor-pointer' onClick={() => handleChange("AR")}> <ReactCountryFlag style={{width:"50px", height:"25px", borderRadius:"15px"}} countryCode="DZ" svg /></div>
-                      </div>
-                      
-                  </div>
-                  {arrowStatus ? <KeyboardArrowUpIcon sx={{ color: "#212832", cursor: "pointer" }} /> : <KeyboardArrowDownIcon sx={{ color: "#212832", cursor: "pointer" }} />}
-              </div>
-          </div>
-          {/* User Account */}
-          <div className='flex justify-center items-center gap-4'>
-              {/* user image */}
-              <div className='w-[50px] h-[50px] overflow-hidden rounded-full cursor-pointer'><img className=' w-full h-full' src={userImg} alt="" /></div>
-              {/* info */}
-              <div className='flex flex-col justify-center items-center gap-[1px] text-mainTextColor '>
-                  <h4 className='font-extrabold text-[16px]'>Your Account</h4>
-                  <span className='text-[14px]'>Nobody</span>
-              </div>
-          </div>
-      </nav>
-    </header>
+     <header className='w-full px-[100px] py-[20px] flex justify-between items-center mb-[100px]'>
+            <div className="navbar bg-transparent">
+                <div className="flex-1">
+                    <a className="btn btn-ghost text-xl">StayDz</a>
+                </div>
+                <div className="flex-none gap-2">
+                    <div className="dropdown dropdown-end">
+                    <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
+                        <div className="w-10 rounded-full">
+                        <img alt="Tailwind CSS Navbar component" src="https:daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+                        </div>
+                    </div>
+                    <ul tabIndex={0} className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                        <li>
+                        <a className="justify-between">
+                            Profile
+                            <span className="badge">New</span>
+                        </a>
+                        </li>
+                        <li><a>Logout</a></li>
+                    </ul>
+                    </div>
+                </div>
+            </div>
+        </header>
     <div className='mb-20 shadow'>
       <div className='flex items-start mb-5'>
       <h1 className='text-2xl font-normal'>Overview</h1>
@@ -208,9 +239,9 @@ const Secretaire = () => {
     <div className="datatable">
       <div className="datatableTitle">
         vew all Users
-      <div className='link'>
-        Add New
-      </div>
+        <Link to="/Secretaire/NewUser" className="link">
+    Add New
+  </Link>
       </div>
       <DataGrid
         className="datagrid"

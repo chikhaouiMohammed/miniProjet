@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import ReactCountryFlag from "react-country-flag"
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
@@ -8,16 +8,36 @@ import { PiHouse } from "react-icons/pi";
 import { RiHotelBedFill } from "react-icons/ri";
 import { IoBookmarkOutline } from "react-icons/io5";
 import { Line } from "react-chartjs-2";
-import { Chart as ChartJS } from "chart.js/auto";
 import Dashboard from './Routes/Dashboard';
+import FrontDesk from './Routes/FrontDesk';
+import RoomTypes from './Routes/RoomTypes';
+
 
 
 function HotelOwner() {
-  const [arrowStatus, setArrowStatus] = useState(false);
-    const [language, setLanguage] = useState('EN');
-    const handleLanguageChange = (value) => {
-        setLanguage(value);
-    };
+  
+  
+  const [isDash, setIsDash] = useState(true);
+  const [isDesk, setIsDesk] = useState(false);
+  const [isRoom, setIsRoom] = useState(false);
+
+  
+
+  const handleDashClick = ()=>{
+    setIsDash(true)
+    setIsDesk(false)
+    setIsRoom(false)
+  }
+  const handleDeskClick = ()=>{
+    setIsDash(false)
+    setIsDesk(true)
+    setIsRoom(false)
+  }
+  const handleRoomClick = ()=>{
+    setIsDash(false)
+    setIsDesk(false)
+    setIsRoom(true)
+  }
 
     
   return (
@@ -54,13 +74,15 @@ function HotelOwner() {
           {/* Aside */}
           <div className='w-fit h-full px-3 '>
             <ul className='flex flex-col justify-center items-center gap-10 h-full'>
-              <li className=''><a className='flex justify-center items-start gap-2 transition-all duration-300 hover:text-mainColor' href="/dashboard"><span><PiHouse style={{fontWeight: 400, fontSize:"28px"}}/></span><span className='text-xl font-semibold'>Dashboard</span></a></li>
-              <li className=''><a className='flex justify-center items-start gap-2 transition-all duration-300 hover:text-mainColor' href="/front-desk"><span><FiEdit style={{fontWeight: 300, fontSize:"25px"}}/></span><span className='text-xl font-semibold'>Front Desk</span></a></li>
-              <li className=''><a className='flex justify-center items-start gap-2 transition-all duration-300 hover:text-mainColor' href="/room-type"><span><IoBookmarkOutline style={{fontWeight: 400, fontSize:"27px"}}/></span><span className='text-xl font-semibold'>Room Type</span></a></li>
+              <li className='cursor-pointer'><a className='flex justify-center items-start gap-2 transition-all duration-300 hover:text-mainColor'><span><PiHouse style={{fontWeight: 400, fontSize:"28px"}}/></span><span className='text-xl font-semibold' onClick={handleDashClick}>Dashboard</span></a></li>
+              <li className='cursor-pointer'><a className='flex justify-center items-start gap-2 transition-all duration-300 hover:text-mainColor'><span><FiEdit style={{fontWeight: 300, fontSize:"25px"}}/></span><span className='text-xl font-semibold' onClick={handleDeskClick}>Front Desk</span></a></li>
+              <li className='cursor-pointer'><a className='flex justify-center items-start gap-2 transition-all duration-300 hover:text-mainColor'><span><IoBookmarkOutline style={{fontWeight: 400, fontSize:"27px"}}/></span><span className='text-xl font-semibold' onClick={handleRoomClick}>Room Type</span></a></li>
             </ul>
           </div>
-          {/* details content */}
-         <Dashboard/>
+          
+         {isDash && <Dashboard/>}
+         {isDesk && <FrontDesk/>}
+         {isRoom && <RoomTypes/>}
         </div>
     </div>
   )

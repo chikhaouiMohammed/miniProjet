@@ -7,15 +7,13 @@ import Landing from './pages/Landing'
 import { hotelTotalRevenue } from "./Data/HotelOwnerData";
 import SignUp from "./pages/SingUp/SignUp";
 import SignIn from "./pages/SignIn/SignIn";
-import Payment from './pages/Payment/Payment'
 import User from "./pages/UserAccount/User";
 import ChangePAssword from './components/ChangePassword'
 import UserInfo from './components/UserInfo'
 import Secretaire from './pages/SecretairePage.jsx/Secretaire'
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
-
-
+import NewUser from "./pages/User/NewUser";
 
 function App() {
   const [visitors, setVisitors] = useState({
@@ -30,25 +28,38 @@ function App() {
       pointBackgroundColor: 'purple',
       pointBorderWidth: 5
     }]
-  }
-  );
+  });
 
-  const {currentUser} = useContext(AuthContext)
+  const { currentUser, role } = useContext(AuthContext);
 
   const RequireAuth = ({ children }) => {
     return currentUser ? children : <Navigate to="/login" />;
   };
-  
+
+  const RequireRole = ({ children, requiredRole }) => {
+    if (!currentUser) {
+      return <Navigate to="/login" />;
+    }
+
+    if (role !== requiredRole) {
+      return <Navigate to="/login" />;
+    }
+
+    return children;
+  };
 
   return (
     <div>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Landing/>} />
-          <Route path="/login" element={<SignIn/>} />
-          <Route path="/register" element={<SignUp/>} />
-          <Route path="/hotel-search" index element={<RequireAuth><HotelSearch/></RequireAuth>} />
-          <Route path="/hotel-owner" index element={<RequireAuth><HotelOwner/></RequireAuth>} />
+          <Route path="/login" element={<SignIn />} />
+          <Route path="/register" element={<SignUp />} />
+
+          <Route path="/Secretaire/NewUser" element={<NewUser/>} />
+          <Route path="/hotel-search" element={<RequireAuth><RequireRole requiredRole='guest'><HotelSearch /></RequireRole></RequireAuth>} />
+          <Route path="/hotel-owner" element={<RequireAuth><RequireRole requiredRole="hotel-owner"><HotelOwner /></RequireRole></RequireAuth>} />
+          <Route path="/admin" element={<RequireAuth><RequireRole requiredRole="admin"><Admin chartData={visitors} /></RequireRole></RequireAuth>} />
         </Routes>
       </BrowserRouter>
     </div>
