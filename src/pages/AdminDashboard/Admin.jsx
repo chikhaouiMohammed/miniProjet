@@ -44,7 +44,7 @@ function Admin({ chartData }) {
   return (
     <div className="font-poppins">
         <header className='w-full px-[100px] py-[20px] flex justify-between items-center mb-[74px] box-shadow'>
-          <div className="navbar bg-base-100">
+          <div className="navbar bg-transparent">
             <div className="flex-1">
               <a className="btn btn-ghost text-xl">StayDz</a>
             </div>

@@ -8,14 +8,13 @@ import { useContext, useState } from 'react';
 import './style.css';
 import { auth, db } from '../../Data/Firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { hotelOwnerRoute, hotelSearchRoute } from '../../Routes';
+import { adminRoute, hotelOwnerRoute, hotelSearchRoute } from '../../Routes';
 import { AuthContext } from '../../context/AuthContext';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [userType, setUserType] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { dispatch } = useContext(AuthContext);
@@ -35,6 +34,8 @@ const SignIn = () => {
     const guestUserQuery = query(guestUsersRef, where('email', '==', email));
     const hotelUsersRef = collection(db, 'hotelUsers');
     const hotelUserQuery = query(hotelUsersRef, where('email', '==', email));
+    const adminRef = collection(db, 'Admin');
+    const adminQuery = query(adminRef, where('email', '==', email));
   
     try {
       const guestUserSnapshot = await getDocs(guestUserQuery);
@@ -43,7 +44,7 @@ const SignIn = () => {
         signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
             const user = userCredential.user;
-            dispatch({ type: "LOGIN", payload: user });
+            dispatch({ type: "LOGIN", payload: { user: user, role: "guest" } });
             navigate(hotelSearchRoute);
           })
           .catch((error) => {
@@ -53,7 +54,7 @@ const SignIn = () => {
           .finally(() => {
             setLoading(false);
           });
-        return; // Exit function
+        return;
       }
   
       const hotelUserSnapshot = await getDocs(hotelUserQuery);
@@ -62,7 +63,7 @@ const SignIn = () => {
         signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
             const user = userCredential.user;
-            dispatch({ type: "LOGIN", payload: user });
+            dispatch({ type: "LOGIN", payload: { user: user, role: "hotel-owner" } });
             navigate(hotelOwnerRoute);
           })
           .catch((error) => {
@@ -74,8 +75,25 @@ const SignIn = () => {
           });
         return; // Exit function
       }
-  
-      // Handle case when neither guest nor hotel user is found
+      const adminSnapshot = await getDocs(adminQuery)
+      if(adminSnapshot.size === 1){
+         // User is an admin
+         signInWithEmailAndPassword(auth, email, password)
+         .then((userCredential) => {
+           const user = userCredential.user;
+           dispatch({ type: "LOGIN", payload: { user: user, role: "admin" } });
+           navigate(adminRoute);
+         })
+         .catch((error) => {
+           const errorMessage = error.message;
+           alert(errorMessage);
+         })
+         .finally(() => {
+           setLoading(false);
+         });
+       return; // Exit function
+      }
+      
       alert('User not found');
       setLoading(false);
     } catch (error) {
@@ -83,8 +101,6 @@ const SignIn = () => {
       setLoading(false);
     }
   };
-  
-  
 
   return (
     <div className='w-full h-screen flex items-start'>
