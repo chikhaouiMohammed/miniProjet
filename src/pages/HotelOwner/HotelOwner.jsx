@@ -11,6 +11,7 @@ import { Line } from "react-chartjs-2";
 import Dashboard from './Routes/Dashboard';
 import FrontDesk from './Routes/FrontDesk';
 import RoomTypes from './Routes/RoomTypes';
+import { AuthContext } from '../../context/AuthContext';
 
 
 
@@ -20,7 +21,9 @@ function HotelOwner() {
   const [isDash, setIsDash] = useState(true);
   const [isDesk, setIsDesk] = useState(false);
   const [isRoom, setIsRoom] = useState(false);
-
+  const { currentUser } = useContext(AuthContext);
+  const email = currentUser ? currentUser.email : '';
+  console.log(email)
   
 
   const handleDashClick = ()=>{

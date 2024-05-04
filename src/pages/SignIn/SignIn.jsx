@@ -16,10 +16,14 @@ const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isSecreter, setIsSecreter] = useState(false);
   const navigate = useNavigate();
   const { dispatch } = useContext(AuthContext);
 
   const handleEmail = (e) => {
+    setEmail(e.target.value);
+  };
+  const handleSecEmail = (e) => {
     setEmail(e.target.value);
   };
   
@@ -44,7 +48,7 @@ const SignIn = () => {
         signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
             const user = userCredential.user;
-            dispatch({ type: "LOGIN", payload: { user: user, role: "guest" } });
+            dispatch({ type: "LOGIN", payload: { user: user, role: "guest", email: email } }); // Include email in payload
             navigate(hotelSearchRoute);
           })
           .catch((error) => {
@@ -63,7 +67,7 @@ const SignIn = () => {
         signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
             const user = userCredential.user;
-            dispatch({ type: "LOGIN", payload: { user: user, role: "hotel-owner" } });
+            dispatch({ type: "LOGIN", payload: { user: user, role: "hotel-owner", email: email } }); // Include email in payload
             navigate(hotelOwnerRoute);
           })
           .catch((error) => {
@@ -81,7 +85,7 @@ const SignIn = () => {
          signInWithEmailAndPassword(auth, email, password)
          .then((userCredential) => {
            const user = userCredential.user;
-           dispatch({ type: "LOGIN", payload: { user: user, role: "admin" } });
+           dispatch({ type: "LOGIN", payload: { user: user, role: "admin", email: email } }); // Include email in payload
            navigate(adminRoute);
          })
          .catch((error) => {
@@ -100,7 +104,19 @@ const SignIn = () => {
       console.error("Error fetching user:", error);
       setLoading(false);
     }
+    
   };
+  
+  const handleRole = (value) => {
+    
+    if(value == 'secreter'){
+      setIsSecreter(true)
+    }
+    else {
+      setIsSecreter(false)
+    }
+    
+  }
 
   return (
     <div className='w-full h-screen flex items-start'>
@@ -109,6 +125,23 @@ const SignIn = () => {
       </div>
       <div className='w-1/2 h-full bg-[#FFFFFF] flex flex-col p-20 justify-between items-center '>
         <div className='w-full flex flex-col max-w-[400px]'>
+        {/* You can open the modal using document.getElementById('ID').showModal() method */}
+        <button className="btn bg-red-500" onClick={()=>document.getElementById('my_modal_3').showModal()}>Before Login Chose Your Role Here !</button>
+        <dialog id="my_modal_3" className="modal">
+          <div className="modal-box">
+            <form method="dialog">
+              {/* if there is a button in form, it will close the modal */}
+              <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+            </form>
+            <h3 className='w-full flex justify-center items-center mb-5'>Who you are ?</h3>
+            <div className='flex justify-between items-center'>
+              <button className="btn btn-info" onClick={()=> handleRole('guest')}>Guest</button>
+              <button className="btn btn-success" onClick={()=> handleRole('secreter')}>Secreter</button>
+              <button className="btn btn-warning" onClick={()=> handleRole('hotelOwner')}>Hotel Owner</button>
+            </div>
+            <p className="py-4">Press ESC key or click on ✕ button to close</p>
+          </div>
+        </dialog>
           <div className='w-full flex flex-col mb-5'>
             <h3 className='text-3xl font-medium mb-4'>Sign in</h3>
             <p className='text-sm mb-2'>If you don’t have an account register
@@ -130,6 +163,17 @@ const SignIn = () => {
                 className='w-full text-black py-3 pl-6 my-3 border-b border-[#FF432A] outline-none focus:outline-none bg-none'
               />
             </div>
+            {/* Are you a Secreter? */}
+            {isSecreter && <div className='relative'>
+                            <label htmlFor="email">Hotel Secreter Email</label>
+                              <TfiEmail className='absolute bottom-7'/>
+                              <input type="email"
+                                onChange={handleSecEmail}
+                                id="email"
+                                placeholder='Secreter Email Address'
+                                className='w-full text-black py-3 pl-6 my-3 border-b border-[#FF432A] outline-none focus:outline-none bg-none'
+                              />
+                          </div>}
             <div className='relative'>
               <label className='mt-8' htmlFor="">Password</label>
               <RiLockPasswordLine className='absolute bottom-7 ' />

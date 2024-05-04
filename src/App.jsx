@@ -52,13 +52,14 @@ function App() {
     <div>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Landing/>} />
+          <Route path="/" element={<Secretaire/>} />
           <Route path="/login" element={<SignIn />} />
           <Route path="/register" element={<SignUp />} />
 
           <Route path="/Secretaire/NewUser" element={<NewUser/>} />
           <Route path="/hotel-search" element={<RequireAuth><RequireRole requiredRole='guest'><HotelSearch /></RequireRole></RequireAuth>} />
           <Route path="/hotel-owner" element={<RequireAuth><RequireRole requiredRole="hotel-owner"><HotelOwner /></RequireRole></RequireAuth>} />
+          <Route path="/hotel-secreter" element={<RequireAuth><RequireRole requiredRole="hotel-secreter"><Secretaire /></RequireRole></RequireAuth>} />
           <Route path="/admin" element={<RequireAuth><RequireRole requiredRole="admin"><Admin chartData={visitors} /></RequireRole></RequireAuth>} />
         </Routes>
       </BrowserRouter>

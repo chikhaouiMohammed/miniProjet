@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 import { hotelOwnerRoute, hotelSearchRoute } from '../../Routes';
 import './style.css'
 import { auth, db } from '../../Data/Firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { collection, doc, setDoc } from 'firebase/firestore';
 
 
 
@@ -28,7 +28,18 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  console.log(password)
+
+
+  
+  // const hotelsCollectionRef = doc(collection(db,'hotelList','Tlemcen', 'hotels'))
+  const hotelListRef = collection(db,"hotelList");
+
+  // Reference to the document named "Tlemcen" within hotelList collection
+  const tlemcenDocRef = doc(hotelListRef,"Tlemcen");
+
+  // Reference to the subcollection "hotels" within the "Tlemcen" document
+  // const hotelsCollectionRef = collection(tlemcenDocRef,"hotels");
+
   
   const handleUserTypeChange = (value) => {
     setUserType(value);
@@ -70,6 +81,10 @@ const SignUp = () => {
             email: email,
             password: password
           });
+          await setDoc(doc(collection(tlemcenDocRef,"hotels"), email), {
+            "email": email
+          });
+          
           navigate(hotelOwnerRoute); 
         }
         setRegistered(true);

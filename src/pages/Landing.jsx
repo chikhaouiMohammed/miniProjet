@@ -13,7 +13,6 @@ function Landing() {
     background: `url(${headerBg}) top right / cover no-repeat`, 
     minHeight: '100vh', 
     backgroundPosition: '765px 0px', 
-    // backgroundAttachment: 'fixed', 
     backgroundSize: '70%',
   };
   return (
