@@ -1,134 +1,158 @@
-import {useEffect,  useState } from "react";
-import { addDoc, collection, doc,  getDocs,where,query } from "firebase/firestore"; 
-
-import {db} from '../../Data/Firebase'
+import { useContext, useEffect, useState } from "react";
+import { addDoc, collection, doc, getDocs, where, query, updateDoc, arrayUnion, getDoc, setDoc } from "firebase/firestore"; 
+import { db } from '../../Data/Firebase'
 import { useNavigate } from "react-router-dom";
+import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { Box } from "@mui/material";
+import { AuthContext } from "../../context/AuthContext";
+import { useReservation } from "../../context/ReservationDataContext";
 
 const NewUser = () => {
-
-  const [UserName, setUserName] = useState('');
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
-  const [dateofbirth, setDateofbirth] = useState('');
+  const [checkInDate, setCheckInDate] = useState(null);
+  const [checkOutDate, setCheckOutDate] = useState(null);
   const [country, setCountry] = useState('');
-  const [Age, setAge] = useState('');
   const [roomType, setRoomType] = useState('');
+  const [doubleCount, setDoubleCount] = useState(0);
+  const [standardCount, setStandardCount] = useState(0);
+  const [familyCount, setFamilyCount] = useState(0);
+  const [suiteCount, setSuiteCount] = useState(0);
+  const [hotelEmail, setHotelEmail] = useState('');
+  const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { dispatch } = useContext(AuthContext);
+  const secretrEmail = currentUser ? currentUser.email : '';
+  const { setReservationData } = useReservation();
 
-  const handleUserNameChange = (event) => {
-    setUserName(event.target.value); 
+  console.log(secretrEmail)
+
+  useEffect(() => {
+    const fetchHotelUserId = async () => {
+      try {
+        const hotelUsersRef = collection(db, 'hotelUsers');
+        const hotelUsersQuery = query(hotelUsersRef, where('secreter.email', '==', currentUser.email));
+        const hotelUsersSnapshot = await getDocs(hotelUsersQuery);
+        if (!hotelUsersSnapshot.empty) {
+          const hotelUserDoc = hotelUsersSnapshot.docs[0];
+          setHotelEmail(hotelUserDoc.id);
+        }
+      } catch (error) {
+        console.error("Error fetching hotel user ID:", error);
+      }
+    };
+
+    fetchHotelUserId();
+  }, [currentUser.email]);
+
+  const handleCheckInDateChange = (date) => {
+    setCheckInDate(date);
   };
-  const handleEmailChange = (event) => {
-    setEmail(event.target.value); 
-  };
-  const handleDateChange = (event) => {
-    setDateofbirth(event.target.value); 
-  };
-  const handleCountryChange = (event) => {
-    setCountry(event.target.value); 
-  };
-  const handleAgeChange = (event) => {
-    setAge(event.target.value); 
-  };
-  const handleRoomTypeChange = (event) => {
-    setRoomType(event.target.value); 
+
+  const handleCheckOutDateChange = (date) => {
+    setCheckOutDate(date);
   };
 
   const handleAdd = async (e) => {
     e.preventDefault();
+    const reservation = {
+      fullName,
+      email,
+      hotelEmail,
+      checkInDate: checkInDate.$d,
+      checkOutDate: checkOutDate.$d,
+      country,
+      roomType,
+      doubleCount,
+      standardCount,
+      familyCount,
+      suiteCount
+    };
+  
     try {
-      await addDoc(collection(db, "users"), {
-        UserName,
-        email,
-        dateofbirth,
-        country,
-        Age,
-        roomType
-      });
-      console.log("Document successfully written!");
-      // Clear the form after submission if needed
-      setUserName('');
-      setEmail('');
-      setDateofbirth('');
-      setCountry('');
-      setAge('');
-      setRoomType('');
-      navigate(-1)
-    } catch (err) {
-      console.error("Error adding document: ", err);
+      const hotelDocRef = doc(collection(db, "hotelList", "Tlemcen", "hotels"), hotelEmail);
+      
+     
+      const hotelDocSnap = await getDoc(hotelDocRef);
+      if (hotelDocSnap.exists()) {
+        const hotelData = hotelDocSnap.data();
+        
+        // Check if the reservation array already exists
+        if (hotelData.reservation) {
+          // If the reservation array exists, add the new reservation to it
+          await updateDoc(hotelDocRef, {
+            reservation: [...hotelData.reservation, reservation]
+          });
+        } else {
+          // If the reservation array doesn't exist yet, create a new one with the reservation
+          await setDoc(hotelDocRef, { reservation: [reservation] }, { merge: true });
+        }
+        setReservationData(reservation);
+        dispatch({ type: "LOGIN", payload: { user: reservation, role: "guest", email: currentUser.email } }); 
+        navigate('/payment', { state: { reservation: reservation } });
+
+      } else {
+        console.error("Hotel document does not exist!");
+      }
+    } catch (error) {
+      console.error("Error adding reservation:", error);
     }
   };
   
-//   useEffect(() => {
-//     const handleData = async () => {
-//         const hotelsCollectionRef = collection(db, 'hotelList', 'Tlemcen', 'hotels');
-//         const querySnapshot = await getDocs(query(hotelsCollectionRef, where('email', '==', email)));
 
-//         if (!querySnapshot.empty) {
-//             // Loop through the documents if needed
-//             querySnapshot.forEach(doc => {
-//                 console.log(doc.id, ' => ', doc.data());
-//             });
-//         } else {
-//             console.log("No documents found");
-//         }
-//     };
-//     handleData();
-// }, [email]);
-
-  
-  
-
-  
-
-
-  
   return (
-    <form onSubmit={handleAdd}  className="w-full max-w-lg mx-auto mt-36">
-    <div className="flex flex-wrap -mx-3 mb-6">
-      <div className="w-full md:w-1/2 px-3 mb-6">
-        <label htmlFor="username" className="block text-gray-700 text-sm font-bold mb-2">Username</label>
-        <input type="text"
-          id="username"
-          name="username"
-          onChange={handleUserNameChange} 
-          className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline " />
-      </div>
-      <div className="w-full md:w-1/2 px-3 mb-6">
-        <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">Email</label>
-        <input type="email" id="email" name="email" onChange={handleEmailChange}  className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-      </div>
+    <div className="bg-white py-32 flex justify-center items-center w-full h-full ">
+      <form onSubmit={handleAdd} className="flex justify-center items-center gap-10 flex-col w-[400px]">
+        <label className="input input-bordered flex items-center gap-2 w-full">
+          <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
+        </label>
+        <label className="input input-bordered flex items-center gap-2 w-full">
+          <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full Name" />
+        </label>
+        <div className='w-full'>
+          <Box sx={{width:'100%'}}>
+            <LocalizationProvider  dateAdapter={AdapterDayjs}>
+              <DemoContainer components={['DateTimePicker']}>
+                <DateTimePicker label="Check in date" onChange={handleCheckInDateChange} />
+              </DemoContainer>
+            </LocalizationProvider>
+          </Box>
+        </div>
+        <div className='w-full'>
+          <Box sx={{width:'100%'}}>
+            <LocalizationProvider  dateAdapter={AdapterDayjs}>
+              <DemoContainer components={['DateTimePicker']}>
+                <DateTimePicker label="Check out date" onChange={handleCheckOutDateChange} />
+              </DemoContainer>
+            </LocalizationProvider>
+          </Box>
+        </div>
+        <label className="input input-bordered flex items-center gap-2 w-full">
+          <input type="text" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Country" />
+        </label>
+        <h2 className="text-[25px] font-bold text-black">Room Selected</h2>
+        <div className="flex justify-center items-center gap-4">
+          <h3 className="font-bold text-xl">Standard</h3>
+          <div><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setStandardCount(standardCount - 1)}>-</span><span className="text-[22px]">{standardCount}</span><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setStandardCount(standardCount + 1)}>+</span></div>
+        </div>
+        <div className="flex justify-center items-center gap-4">
+          <h3 className="font-bold text-xl">Double</h3>
+          <div><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setDoubleCount(doubleCount - 1)}>-</span><span className="text-[22px]">{doubleCount}</span><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setDoubleCount(doubleCount + 1)}>+</span></div>
+        </div>
+        <div className="flex justify-center items-center gap-4">
+          <h3 className="font-bold text-xl">Family</h3>
+          <div><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setFamilyCount(familyCount - 1)}>-</span><span className="text-[22px]">{familyCount}</span><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setFamilyCount(familyCount + 1)}>+</span></div>
+        </div>
+        <div className="flex justify-center items-center gap-4">
+          <h3 className="font-bold text-xl">Suite</h3>
+          <div><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setSuiteCount(suiteCount - 1)}>-</span><span className="text-[22px]">{suiteCount}</span><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setSuiteCount(suiteCount + 1)}>+</span></div>
+        </div>
+        <button type="submit" className="btn btn-primary">Submit</button>
+      </form>
     </div>
-    <div className="flex flex-wrap -mx-3 mb-6">
-      <div className="w-full md:w-1/2 px-3 mb-6">
-        <label htmlFor="dateOfBirth" className="block text-gray-700 text-sm font-bold mb-2">Date of Birth</label>
-        <input type="date" id="dateOfBirth" name="dateOfBirth" onChange={handleDateChange}   className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-      </div>
-      <div className="w-full md:w-1/2 px-3 mb-6">
-        <label htmlFor="country" className="block text-gray-700 text-sm font-bold mb-2">Country</label>
-        <input type="text" id="country" name="country" onChange={handleCountryChange}   className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-      </div>
-      <div className="w-full md:w-1/2 px-3 mb-6">
-        <label htmlFor="age" className="block text-gray-700 text-sm font-bold mb-2">Age</label>
-        <input type="text" id="age" name="age" onChange={handleAgeChange}   className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" />
-      </div>
-    </div>
-    <div className="flex flex-wrap -mx-3 mb-6">
-      <div className="w-full px-3 mb-6">
-        <label htmlFor="roomType" className="block text-gray-700 text-sm font-bold mb-2">Room Type</label>
-        <select id="roomType" name="roomType" onChange={handleRoomTypeChange}  className="appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-          <option value="">Select Room Type</option>
-          <option value="Single">Single</option>
-          <option value="Double">Double</option>
-          <option value="Triple">Triple</option>
-          <option value="Vip">Vip</option>
-        </select>
-      </div>
-    </div>
-    <div className="flex justify-center">
-      <button type="submit" className="bg-mainColor text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Create Booking</button>
-    </div>
-  </form>
   )
 }
 
-export default NewUser
+export default NewUser;

@@ -1,6 +1,6 @@
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ReactCountryFlag from "react-country-flag"
 import userImg from '../../images/Ellipse 437.png'
 import './Secretaire.css'
@@ -11,29 +11,65 @@ import KeyboardArrowUpOutlinedIcon from "@mui/icons-material/KeyboardArrowUpOutl
 import { DataGrid } from '@mui/x-data-grid';
 import { userColumns } from "../../Data/datatablesource";
 import { Link } from "react-router-dom";
-import {collection,getDocs,deleteDoc,doc} from "firebase/firestore";
+import {collection,getDocs,deleteDoc,doc, query, where, getDoc} from "firebase/firestore";
 import { db } from "../../Data/Firebase";
+import profileAvatar from '../../images/blank-profile-picture-973460_1280.png'
+import { AuthContext } from '../../context/AuthContext';
 const Secretaire = () => {
 
-    const [language, setLanguage] = useState('EN');
-    const [arrowStatus, setarrowStatus] = useState(false);
+  const { currentUser } = useContext(AuthContext);
+  const [hotelEmail, setHotelEmail] = useState('');
+  const [data, setData] = useState({});
+  const [reservationUsers, setReservationUsers] = useState([])
 
-    const handleChange = (value) => {
-        setLanguage(value);
-    };
-    const [data, setData] = useState([]);
+  const tlemcenDocRef = doc(collection(db, "hotelList"), "Tlemcen");
 
-    const handleDelete = async (id) => {
-      try {
-        await deleteDoc(doc(db, "users", id));
-        setData(data.filter((item) => item.id !== id));
-      } catch (err) {
-        console.log(err);
-      }
+  useEffect(() => {
+      const fetchHotelUserId = async () => {
+          try {
+              const hotelUsersRef = collection(db, 'hotelUsers');
+              const hotelUsersQuery = query(hotelUsersRef, where('secreter.email', '==', currentUser.email));
+              const hotelUsersSnapshot = await getDocs(hotelUsersQuery);
+              if (!hotelUsersSnapshot.empty) {
+                  const hotelUserDoc = hotelUsersSnapshot.docs[0];
+                  setHotelEmail(hotelUserDoc.id);
+              }
+          } catch (error) {
+              console.error("Error fetching hotel user ID:", error);
+          }
+      };
+
+      fetchHotelUserId();
+  }, [currentUser.email]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            if (!hotelEmail) return; // Make sure hotelEmail is not empty before fetching data
+            const docRef = doc(db, "hotelList", "Tlemcen", "hotels", hotelEmail);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const newData = docSnap.data();
+                setData(newData);
+                // Retrieve the last 10 reservation users
+                const lastTenUsers = newData.reservation.slice(-10);
+                setReservationUsers(lastTenUsers);
+            } else {
+                alert("No such document!");
+            }
+        } catch (error) {
+            console.error("Error fetching document:", error);
+        }
     };
-    const hotelListRef = collection(db,"hotelList");
-    const tlemcenDocRef = doc(hotelListRef,"Tlemcen");
-    const hotelsCollectionRef = collection(tlemcenDocRef,"hotels");
+    fetchData();
+}, [hotelEmail]); // Ensure useEffect runs when hotelEmail changes
+
+
+
+  console.log(reservationUsers)
+    
+ 
 
 
   return (
@@ -222,12 +258,12 @@ const Secretaire = () => {
       <div className="datatable">
         <div className="datatableTitle">
           vew all Users
-          <Link to="/Secretaire/NewUser" className="link">
+          <Link to="/secreter/new-user" className="link">
             Add New
           </Link>
         </div>
         {/* Last Users Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto ">
             <table className="table">
               {/* head */}
               <thead>
@@ -238,143 +274,48 @@ const Secretaire = () => {
                     </label>
                   </th>
                   <th>Name</th>
-                  <th>Job</th>
-                  <th>Favorite Color</th>
+                  <th>email</th>
+                  <th>Check In</th>
+                  <th>Check Out</th>
+                  <th>Total Price</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
-                {/* row 1 */}
-                <tr>
-                  <th>
-                    <label>
-                      <input type="checkbox" className="checkbox" />
-                    </label>
-                  </th>
-                  <td>
-                    <div className="flex items-center gap-3">
-                      <div className="avatar">
-                        <div className="mask mask-squircle w-12 h-12">
-                          <img src="https://img.daisyui.com/tailwind-css-component-profile-2@56w.png" alt="Avatar Tailwind CSS Component" />
+                  {reservationUsers.map((reservationUser) => (
+                    <tr key={reservationUser.email}>
+                      <td>
+                        <label>
+                          <input type="checkbox" className="checkbox" />
+                        </label>
+                      </td>
+                      <td>
+                        <div className="flex items-center gap-3">
+                          <div className="avatar">
+                            <div className="mask mask-squircle w-12 h-12">
+                              <img src={profileAvatar} alt="Avatar Tailwind CSS Component" />
+                            </div>
+                          </div>
+                          <div>
+                            <div className="font-bold">{reservationUser.fullName}</div>
+                            <div className="text-sm opacity-50">{reservationUser.country}</div>
+                          </div>
                         </div>
-                      </div>
-                      <div>
-                        <div className="font-bold">Hart Hagerty</div>
-                        <div className="text-sm opacity-50">United States</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    Zemlak, Daniel and Leannon
-                    <br/>
-                    <span className="badge badge-ghost badge-sm">Desktop Support Technician</span>
-                  </td>
-                  <td>Purple</td>
-                  <th>
-                    <button className="btn btn-ghost btn-xs">details</button>
-                  </th>
-                </tr>
-                {/* row 2 */}
-                <tr>
-                  <th>
-                    <label>
-                      <input type="checkbox" className="checkbox" />
-                    </label>
-                  </th>
-                  <td>
-                    <div className="flex items-center gap-3">
-                      <div className="avatar">
-                        <div className="mask mask-squircle w-12 h-12">
-                          <img src="https://img.daisyui.com/tailwind-css-component-profile-3@56w.png" alt="Avatar Tailwind CSS Component" />
-                        </div>
-                      </div>
-                      <div>
-                        <div className="font-bold">Brice Swyre</div>
-                        <div className="text-sm opacity-50">China</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    Carroll Group
-                    <br/>
-                    <span className="badge badge-ghost badge-sm">Tax Accountant</span>
-                  </td>
-                  <td>Red</td>
-                  <th>
-                    <button className="btn btn-ghost btn-xs">details</button>
-                  </th>
-                </tr>
-                {/* row 3 */}
-                <tr>
-                  <th>
-                    <label>
-                      <input type="checkbox" className="checkbox" />
-                    </label>
-                  </th>
-                  <td>
-                    <div className="flex items-center gap-3">
-                      <div className="avatar">
-                        <div className="mask mask-squircle w-12 h-12">
-                          <img src="https://img.daisyui.com/tailwind-css-component-profile-4@56w.png" alt="Avatar Tailwind CSS Component" />
-                        </div>
-                      </div>
-                      <div>
-                        <div className="font-bold">Marjy Ferencz</div>
-                        <div className="text-sm opacity-50">Russia</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    Rowe-Schoen
-                    <br/>
-                    <span className="badge badge-ghost badge-sm">Office Assistant I</span>
-                  </td>
-                  <td>Crimson</td>
-                  <th>
-                    <button className="btn btn-ghost btn-xs">details</button>
-                  </th>
-                </tr>
-                {/* row 4 */}
-                <tr>
-                  <th>
-                    <label>
-                      <input type="checkbox" className="checkbox" />
-                    </label>
-                  </th>
-                  <td>
-                    <div className="flex items-center gap-3">
-                      <div className="avatar">
-                        <div className="mask mask-squircle w-12 h-12">
-                          <img src="https://img.daisyui.com/tailwind-css-component-profile-5@56w.png" alt="Avatar Tailwind CSS Component" />
-                        </div>
-                      </div>
-                      <div>
-                        <div className="font-bold">Yancy Tear</div>
-                        <div className="text-sm opacity-50">Brazil</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    Wyman-Ledner
-                    <br/>
-                    <span className="badge badge-ghost badge-sm">Community Outreach Specialist</span>
-                  </td>
-                  <td>Indigo</td>
-                  <th>
-                    <button className="btn btn-ghost btn-xs">details</button>
-                  </th>
-                </tr>
+                      </td>
+                      <td>
+                        {reservationUser.email}
+                        <br />
+                      </td>
+                      <td>{reservationUser.checkin?.toDate().toLocaleDateString()}</td>
+                      <td>{reservationUser.checkout?.toDate().toLocaleDateString()}</td>
+                      <td>{reservationUser.totalPrice}</td>
+                      <td>
+                        <button className="btn btn-ghost btn-xs">details</button>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
-              {/* foot */}
-              <tfoot>
-                <tr>
-                  <th></th>
-                  <th>Name</th>
-                  <th>Job</th>
-                  <th>Favorite Color</th>
-                  <th></th>
-                </tr>
-              </tfoot>
+
               
             </table>
           </div>

@@ -1,7 +1,7 @@
 
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import ReactCountryFlag from "react-country-flag"
 import userImg from '../../images/Ellipse 437.png'
 import firstHotelImg from '../../images/Home/paymentPage/HotelImages/image 33.png'
@@ -33,20 +33,58 @@ import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
+import { useReservation } from '../../context/ReservationDataContext';
+import { AuthContext } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../../Data/Firebase';
 
 
 function Payment() {
-    const [language, setLanguage] = useState('EN');
-    const [arrowStatus, setarrowStatus] = useState(false);
+    const { currentUser } = useContext(AuthContext);
+    const { reservation } = useReservation();
+    const [cardDetails, setCardDetails] = useState({});
+    const navigate = useNavigate();
+    
 
-    const handleChange = (value) => {
-        setLanguage(value);
-    };
-    const [age, setAge] = useState('');
+  const handleCardDetails = (e) => {
+    const { name, value } = e.target;
+    setCardDetails(prevState => ({
+        ...prevState,
+        [name]: value
+    }));
+    console.log(cardDetails)
+}
+  
+  const handlePayment = async () => {
+    try {
+      const hotelDocRef = doc(collection(db, "hotelList", "Tlemcen", "hotels"), reservation.hotelEmail);
+      const hotelDocSnap = await getDoc(hotelDocRef);
 
-const handleMethodeChange = (event) => {
-    setAge(event.target.value);
-};
+      if (hotelDocSnap.exists()) {
+        const hotelData = hotelDocSnap.data();
+        
+        const updatedReservation = hotelData.reservation.map(reservationItem => {
+          if (
+            reservationItem.fullName === reservation.fullName &&
+            reservationItem.email === reservation.email
+          ) {
+            return { ...reservationItem, cardDetails: cardDetails };
+          } else {
+            return reservationItem;
+          }
+        });
+
+        await updateDoc(hotelDocRef, { reservation: updatedReservation });
+
+        navigate('/');
+      } else {
+        console.error("Hotel document does not exist!");
+      }
+    } catch (error) {
+      console.error("Error updating reservation:", error);
+    }
+  };
 
 
 return (
@@ -56,27 +94,6 @@ return (
     <div className='text-xl font-bold cursor-pointer'>Logo</div>
   {/* nav */}
     <nav className='flex justify-center items-center gap-5'>
-    {/* languages */}
-    <div className="dropdown">
-        <div onMouseEnter={() => { setarrowStatus(true) }} onMouseOut={() => { setarrowStatus(false) }}>
-        <button className="dropbtn">{language}</button>
-        <div className="dropdown-content">
-            <div className='flex justify-center items-center'>
-            <a onClick={() => handleChange("EN")} href="#">English</a>
-            <div className='cursor-pointer' onClick={() => handleChange("EN")}><ReactCountryFlag style={{ width: "50px", height: "25px", borderRadius: "15px" }} countryCode="US" svg /></div>
-            </div>
-            <div className='flex justify-center items-center'>
-            <a onClick={() => handleChange("FR")} href="#">French</a>
-            <div className='cursor-pointer' onClick={() => handleChange("FR")}><ReactCountryFlag style={{ width: "50px", height: "25px", borderRadius: "15px" }} countryCode="FR" svg /></div>
-            </div>
-            <div className='flex justify-center items-center'>
-            <a onClick={() => handleChange("AR")} href="#">Arabic</a>
-            <div className='cursor-pointer' onClick={() => handleChange("AR")}><ReactCountryFlag style={{ width: "50px", height: "25px", borderRadius: "15px" }} countryCode="DZ" svg /></div>
-            </div>
-        </div>
-        {arrowStatus ? <KeyboardArrowUpIcon sx={{ color: "#212832", cursor: "pointer" }} /> : <KeyboardArrowDownIcon sx={{ color: "#212832", cursor: "pointer" }} />}
-        </div>
-    </div>
     {/* User Account */}
     <div className='flex justify-center items-center gap-4'>
       {/* user image */}
@@ -247,9 +264,9 @@ return (
     <Select
         labelId="demo-select-small-label"
         id="demo-select-small"
-        value={age}
+        
         label="Age"
-        onChange={handleMethodeChange}
+        
     >
         <MenuItem value="">
         <em>None</em>
@@ -309,14 +326,14 @@ return (
                 </div>
                 <div>
                     <h3 className='font-bold text-2xl mt-8'>Full Name</h3>
-                    <div className='flex items-center justify-center gap-4 mt-3 '>
-                        <input type="text"   placeholder='First Name' className=' rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' required />
-                        <input type="text"  placeholder='Laset Name' className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
+                    <div className='flex items-center justify-start gap-4 mt-3 '>
+                    <input type="text" value={reservation?.fullName || ''} placeholder='Full Name' className=' rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' required />
+
                     </div>
                     <div className='flex justify-between gap-4 mt-4'>
                         <div>
                         <h3 className='font-medium text-base'>Email Adress</h3>
-                        <input type="email" name="" id="" placeholder='you email ' className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
+                        <input type="email" value={reservation.email} id="" placeholder='your email ' className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
                         </div>
                         <div>
                             <h3 className='font-medium text-base'>phone number</h3>
@@ -329,7 +346,7 @@ return (
                     </div>
                     <div className='mt-4'>
                         <h4 className='font-medium text-base mb-2'>Country/Region</h4>
-                        <input type="text" name="" id="" placeholder='your country' className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
+                        <input type="text" value={reservation.country} id="" placeholder='your country' className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
                     </div>
                     
                 </div>
@@ -380,36 +397,65 @@ return (
                     </div>
                 </div>
                 
+                 {/* Bank card information */}
                 <div className='flex flex-col mt-8'>
                     <h2 className='text-2xl font-bold'>Bank Card information</h2>
                     <div className='flex flex-col '>
-                    <div className='flex justify-between gap-3 mt-3'>
-                        <div>
-                        <h3 className='font-medium text-base'>Full Name on the card</h3>
-                        <input type="email" name="" id="" placeholder='you name ' className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
+                        <div className='flex justify-between gap-3 mt-3'>
+                            <div>
+                                <h3 className='font-medium text-base'>Full Name on the card</h3>
+                                <input
+                                    type="text"
+                                    name="cardHolderName"
+                                    value={cardDetails.cardHolderName || ''}
+                                    onChange={handleCardDetails}
+                                    placeholder='your name '
+                                    className='rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2'
+                                />
+                            </div>
+                            <div>
+                                <h3 className='font-medium text-base'>Card number</h3>
+                                <input
+                                    type="text"
+                                    name="cardNumber"
+                                    value={cardDetails.cardNumber || ''}
+                                    onChange={handleCardDetails}
+                                    placeholder='your card number'
+                                    className='rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2'
+                                />
+                            </div>
                         </div>
-                        <div>
-                            <h3 className='font-medium text-base'>Card number</h3>
-                            <input type="text" name="" id="" placeholder='your card number' className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
+                        <div className='flex justify-between gap-3 mt-3'>
+                            <div>
+                                <h3 className='font-medium text-base'>Exp date</h3>
+                                <input
+                                    type="text"
+                                    name="expDate"
+                                    value={cardDetails.expDate || ''}
+                                    onChange={handleCardDetails}
+                                    placeholder='**/** '
+                                    className='rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2'
+                                />
+                            </div>
+                            <div>
+                                <h3 className='font-medium text-base'>Cvc</h3>
+                                <input
+                                    type="text"
+                                    name="cvc"
+                                    value={cardDetails.cvc || ''}
+                                    onChange={handleCardDetails}
+                                    placeholder='***'
+                                    className='rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2'
+                                />
+                            </div>
                         </div>
                     </div>
-                    <div className='flex justify-between gap-3 mt-3'>
-                        <div>
-                        <h3 className='font-medium text-base'>Exp date</h3>
-                        <input type="email" name="" id="" placeholder='**/** ' className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
+                    <div className='flex items-center justify-center gap-8 mt-5'>
+                        <div className='relative flex items-center justify-center'>
+                            <button className='bg-white rounded border border-mainColor flex justify-center items-center pt-3 pb-3 pl-4 pr-10 font-bold text-base text-mainColor'>Save in Shortcute</button>
+                            <FavoriteBorderRoundedIcon className='absolute right-3 text-mainColor' />
                         </div>
-                        <div>
-                            <h3 className='font-medium text-base'>Cvc</h3>
-                            <input type="text" name="" id="" placeholder='***' className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
-                        </div>
-                    </div>
-                    </div>                                                    
-                    <div className=' flex items-center justify-center gap-8 mt-5'>
-                    <div className='relative flex items-center justify-center'>
-                        <button className='bg-white rounded border border-mainColor flex justify-center items-center pt-3 pb-3 pl-4 pr-10 font-bold text-base text-mainColor'>Save in Shortcute</button>
-                        <FavoriteBorderRoundedIcon className='absolute right-3 text-mainColor' />
-                    </div>
-                        <button className='bg-mainColor rounded flex justify-center items-center pt-3 pb-3 pl-12 pr-12 font-bold text-base text-white'>Payment</button>
+                        <button className='bg-mainColor rounded flex justify-center items-center pt-3 pb-3 pl-12 pr-12 font-bold text-base text-white' onClick={handlePayment}>Payment</button>
                     </div>
                 </div>
         </div>

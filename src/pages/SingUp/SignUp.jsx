@@ -31,14 +31,8 @@ const SignUp = () => {
 
 
   
-  // const hotelsCollectionRef = doc(collection(db,'hotelList','Tlemcen', 'hotels'))
   const hotelListRef = collection(db,"hotelList");
-
-  // Reference to the document named "Tlemcen" within hotelList collection
   const tlemcenDocRef = doc(hotelListRef,"Tlemcen");
-
-  // Reference to the subcollection "hotels" within the "Tlemcen" document
-  // const hotelsCollectionRef = collection(tlemcenDocRef,"hotels");
 
   
   const handleUserTypeChange = (value) => {

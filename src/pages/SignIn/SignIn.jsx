@@ -8,12 +8,13 @@ import { useContext, useState } from 'react';
 import './style.css';
 import { auth, db } from '../../Data/Firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { adminRoute, hotelOwnerRoute, hotelSearchRoute } from '../../Routes';
+import { adminRoute, hotelOwnerRoute, hotelSearchRoute, secreterRoute } from '../../Routes';
 import { AuthContext } from '../../context/AuthContext';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
+  const [secEmail, setSecEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [isSecreter, setIsSecreter] = useState(false);
@@ -24,7 +25,7 @@ const SignIn = () => {
     setEmail(e.target.value);
   };
   const handleSecEmail = (e) => {
-    setEmail(e.target.value);
+    setSecEmail(e.target.value);
   };
   
   const handlePassword = (e) => {
@@ -42,70 +43,100 @@ const SignIn = () => {
     const adminQuery = query(adminRef, where('email', '==', email));
   
     try {
-      const guestUserSnapshot = await getDocs(guestUserQuery);
-      if (guestUserSnapshot.size === 1) {
-        // User is a guest
-        signInWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
-            const user = userCredential.user;
-            dispatch({ type: "LOGIN", payload: { user: user, role: "guest", email: email } }); // Include email in payload
-            navigate(hotelSearchRoute);
-          })
-          .catch((error) => {
-            const errorMessage = error.message;
-            alert(errorMessage);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-        return;
+      if (isSecreter) {
+        // Query the hotelUsers collection to find the document with the provided email
+        const hotelUserSnapshot = await getDocs(hotelUserQuery);
+        if (hotelUserSnapshot.size === 1) {
+          // User document found, now check if secreter email matches
+          const userDoc = hotelUserSnapshot.docs[0].data();
+          if (userDoc.secreter && userDoc.secreter.email === secEmail) {
+            // User is a secreter
+            signInWithEmailAndPassword(auth, secEmail, password)
+              .then((userCredential) => {
+                const user = userCredential.user;
+                dispatch({ type: "LOGIN", payload: { user: user, role: "hotel-secreter", email: secEmail } }); 
+                navigate(secreterRoute)
+              })
+              .catch((error) => {
+                const errorMessage = error.message;
+                alert(errorMessage);
+              })
+              .finally(() => {
+                setLoading(false);
+              });
+            return; // Exit function
+          }
+        }
+      } else {
+        // Query snapshot for hotel user
+        const hotelUserSnapshot = await getDocs(hotelUserQuery);
+        if (hotelUserSnapshot.size === 1) {
+          // User is a hotel owner
+          signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+              const user = userCredential.user;
+              dispatch({ type: "LOGIN", payload: { user: user, role: "hotel-owner", email: email } }); // Include email in payload
+              navigate(hotelOwnerRoute);
+            })
+            .catch((error) => {
+              const errorMessage = error.message;
+              alert(errorMessage);
+            })
+            .finally(() => {
+              setLoading(false);
+            });
+          return; // Exit function
+        }
+        
+        // Query snapshot for guest user
+        const guestUserSnapshot = await getDocs(guestUserQuery);
+        if (guestUserSnapshot.size === 1) {
+          // User is a guest
+          signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+              const user = userCredential.user;
+              dispatch({ type: "LOGIN", payload: { user: user, role: "guest", email: email } }); // Include email in payload
+              navigate(hotelSearchRoute);
+            })
+            .catch((error) => {
+              const errorMessage = error.message;
+              alert(errorMessage);
+            })
+            .finally(() => {
+              setLoading(false);
+            });
+          return; // Exit function
+        }
+    
+        // Query snapshot for admin user
+        const adminSnapshot = await getDocs(adminQuery);
+        if (adminSnapshot.size === 1) {
+          // User is an admin
+          signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+              const user = userCredential.user;
+              dispatch({ type: "LOGIN", payload: { user: user, role: "admin", email: email } }); // Include email in payload
+              navigate(adminRoute);
+            })
+            .catch((error) => {
+              const errorMessage = error.message;
+              alert(errorMessage);
+            })
+            .finally(() => {
+              setLoading(false);
+            });
+          return; // Exit function
+        }
+        
+        alert('User not found');
+        setLoading(false);
       }
-  
-      const hotelUserSnapshot = await getDocs(hotelUserQuery);
-      if (hotelUserSnapshot.size === 1) {
-        // User is a hotel owner
-        signInWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
-            const user = userCredential.user;
-            dispatch({ type: "LOGIN", payload: { user: user, role: "hotel-owner", email: email } }); // Include email in payload
-            navigate(hotelOwnerRoute);
-          })
-          .catch((error) => {
-            const errorMessage = error.message;
-            alert(errorMessage);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-        return; // Exit function
-      }
-      const adminSnapshot = await getDocs(adminQuery)
-      if(adminSnapshot.size === 1){
-         // User is an admin
-         signInWithEmailAndPassword(auth, email, password)
-         .then((userCredential) => {
-           const user = userCredential.user;
-           dispatch({ type: "LOGIN", payload: { user: user, role: "admin", email: email } }); // Include email in payload
-           navigate(adminRoute);
-         })
-         .catch((error) => {
-           const errorMessage = error.message;
-           alert(errorMessage);
-         })
-         .finally(() => {
-           setLoading(false);
-         });
-       return; // Exit function
-      }
-      
-      alert('User not found');
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching user:", error);
       setLoading(false);
     }
-    
   };
+  
   
   const handleRole = (value) => {
     

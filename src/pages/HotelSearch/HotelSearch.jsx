@@ -99,7 +99,7 @@ function HotelSearch() {
     const handlePriceChange = (event, value) => {
         setPriceValue(value);
       };
-      const handleCheckInDateChange = (date) => {
+    const handleCheckInDateChange = (date) => {
         console.log("Selected Check-In Date:", date);
         
     };

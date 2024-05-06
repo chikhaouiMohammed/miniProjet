@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import Admin from "./pages/AdminDashboard/Admin";
 import { adminData } from "./Data/AdminLineChart";
 import HotelSearch from "./pages/HotelSearch/HotelSearch";
+import Payment from "./pages/Payment/Payment";
 import HotelOwner from "./pages/HotelOwner/HotelOwner";
 import Landing from './pages/Landing'
 import { hotelTotalRevenue } from "./Data/HotelOwnerData";
@@ -14,6 +15,7 @@ import Secretaire from './pages/SecretairePage.jsx/Secretaire'
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
 import NewUser from "./pages/User/NewUser";
+import { ReservationProvider } from "./context/ReservationDataContext";
 
 function App() {
   const [visitors, setVisitors] = useState({
@@ -51,17 +53,20 @@ function App() {
   return (
     <div>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Secretaire/>} />
-          <Route path="/login" element={<SignIn />} />
-          <Route path="/register" element={<SignUp />} />
+        <ReservationProvider>
+          <Routes>
+            <Route path="/" element={<Landing/>} />
+            <Route path="/login" element={<SignIn />} />
+            <Route path="/register" element={<SignUp />} />
 
-          <Route path="/Secretaire/NewUser" element={<NewUser/>} />
-          <Route path="/hotel-search" element={<RequireAuth><RequireRole requiredRole='guest'><HotelSearch /></RequireRole></RequireAuth>} />
-          <Route path="/hotel-owner" element={<RequireAuth><RequireRole requiredRole="hotel-owner"><HotelOwner /></RequireRole></RequireAuth>} />
-          <Route path="/hotel-secreter" element={<RequireAuth><RequireRole requiredRole="hotel-secreter"><Secretaire /></RequireRole></RequireAuth>} />
-          <Route path="/admin" element={<RequireAuth><RequireRole requiredRole="admin"><Admin chartData={visitors} /></RequireRole></RequireAuth>} />
-        </Routes>
+            <Route path="/secreter/new-user" element={<NewUser/>} />
+            <Route path="/payment" element={<RequireAuth><RequireRole requiredRole="guest"><Payment /></RequireRole></RequireAuth>} />
+            <Route path="/hotel-search" element={<RequireAuth><RequireRole requiredRole="guest"><HotelSearch /></RequireRole></RequireAuth>} />
+            <Route path="/hotel-owner" element={<RequireAuth><RequireRole requiredRole="hotel-owner"><HotelOwner /></RequireRole></RequireAuth>} />
+            <Route path="/hotel-secreter" element={<RequireAuth><RequireRole requiredRole="hotel-secreter"><Secretaire /></RequireRole></RequireAuth>} />
+            <Route path="/admin" element={<RequireAuth><RequireRole requiredRole="admin"><Admin chartData={visitors} /></RequireRole></RequireAuth>} />
+          </Routes>
+        </ReservationProvider>
       </BrowserRouter>
     </div>
   );
