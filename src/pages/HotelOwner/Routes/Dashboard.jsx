@@ -1,4 +1,3 @@
-
 import { Line } from "react-chartjs-2";
 import { Chart as ChartJS } from "chart.js/auto";
 import { useContext, useEffect, useState } from "react";
@@ -40,29 +39,155 @@ function Dashboard() {
           }
         }
       };
-      const { currentUser } = useContext(AuthContext);
-      const email = currentUser.email
-      console.log(email)
+      
+      
 
+    
+
+
+
+
+
+
+  const { currentUser } = useContext(AuthContext);
+  const email = currentUser ? currentUser.email : '';
+  console.log(email)
+  const [checkIns, setCheckIns] = useState(0);
+  const [checkOuts, setCheckOuts] = useState(0);
+
+  useEffect(() => {
+    const fetchReservationData = async () => {
+      try {
+       
+        const hotelRef = doc(collection(db, 'hotelList', 'Tlemcen', 'hotels'), email);
+        const hotelDoc = await getDoc(hotelRef);
+
+        if (hotelDoc.exists()) {
+          
+          const reservationData = hotelDoc.data().reservation;
+          
+          
+          
+          const checkInsCount = reservationData.filter(entry => entry['checkInDate']).length;
+          const checkOutsCount = reservationData.filter(entry => entry['checkOutDate']).length;
+          
+          
+          setCheckIns(checkInsCount);
+          setCheckOuts(checkOutsCount);
+        } else {
+          
+          console.log('Document does not exist');
+        }
+      } catch (error) {
+        console.error('Error fetching document:', error);
+      }
+    };
+
+    if (email) {
+      fetchReservationData();
+    }
+  }, [email]);
+
+
+
+
+
+
+
+
+
+  const [doublePrice, setDoublePrice] = useState(null);
+  const [familyPrice, setFamilyPrice] = useState(null);
+  const [standardPrice, setStandardPrice] = useState(null);
+  const [suitePrice, setSuitePrice] = useState(null);
+
+  useEffect(() => {
+    const fetchPriceRoomData = async () => {
+      try {
+        const hotelRef = doc(collection(db, 'hotelList', 'Tlemcen', 'hotels'), email);
+        const hotelDoc = await getDoc(hotelRef);
+
+        if (hotelDoc.exists()) {
+          const priceroomData = hotelDoc.data().roomType;
+          setDoublePrice(priceroomData.double?.price);
+          setFamilyPrice(priceroomData.familly?.price);
+          setStandardPrice(priceroomData.standard?.price);
+          setSuitePrice(priceroomData.suite?.price);
+        } else {
+          console.log('Document does not exist');
+        }
+      } catch (error) {
+        console.error('Error fetching document:', error);
+      }
+    };
+if(email){
+    fetchPriceRoomData();
+}
+  }, [email]);
+
+  const [totalRooms, setTotalRooms] = useState(0);
+  
       useEffect(() => {
-        const handleData = async () => {
-            const hotelsCollectionRef = collection(db, 'hotelList', 'Tlemcen', 'hotels');
-            const querySnapshot = await getDocs(query(hotelsCollectionRef, where('email', '==', email)));
+    const fetchHotelData = async () => {
+      try {
+        const hotelRef = doc(db, 'hotelList', 'Tlemcen', 'hotels', email );
+        const hotelDoc = await getDoc(hotelRef);
+
+        if (hotelDoc.exists()) {
+          const totalRooms = hotelDoc.data().TotalRoom;
+          setTotalRooms(totalRooms);
+        } else {
+          console.log("Hotel document not found for the current user");
+        }
+      } catch (error) {
+        console.error('Error fetching hotel data:', error);
+      }
+    };
+    if (email) {
+      fetchHotelData();
+    }
     
-            if (!querySnapshot.empty) {
-                // Loop through the documents if needed
-                querySnapshot.forEach(doc => {
-                    console.log(doc.id, ' => ', doc.data());
-                });
-            } else {
-                console.log("No documents found");
-            }
-        };
-        handleData();
-    }, [email]);
-    
-      
-      
+  }, [email]);
+
+  const [occupiedRooms, setOccupiedRooms] = useState(0);
+  const availableRooms = totalRooms - occupiedRooms;
+  useEffect(() => {
+  const calculateOccupiedRooms = async () => {
+    try {
+      const hotelRef = doc(collection(db, 'hotelList', 'Tlemcen', 'hotels'), email);
+      const hotelDoc = await getDoc(hotelRef);
+
+      if (hotelDoc.exists()) {
+        const reservationData = hotelDoc.data().reservation;
+        const checkInsCount = reservationData.filter(entry => entry['checkInDate']).length;
+        const occupiedRoomsCount = checkInsCount ;
+        setOccupiedRooms(occupiedRoomsCount);
+      } else {
+        console.log('Document does not exist');
+      }
+    } catch (error) {
+      console.error('Error fetching document:', error);
+    }
+  };
+  if (email) {
+    calculateOccupiedRooms();
+  }
+
+  }, [email]);
+ 
+  
+
+  
+
+
+
+
+
+
+
+
+
+
 
   return (
       <div className='bg-[#F8F8F8] w-full p-5'>
@@ -82,7 +207,7 @@ function Dashboard() {
                     <span className='text-xl text-black'>Check-in</span>
                   </div>
                   {/* Number */}
-                  <div className='text-mainColor text-[38px] font-semibold'>23</div>
+                  <div className='text-mainColor text-[38px] font-semibold'>{checkIns}</div>
                 </div>
                 {/* Check Out */}
                 <div className='flex justify-center items-start gap-3'>
@@ -92,7 +217,7 @@ function Dashboard() {
                     <span className='text-xl text-black'>Check-out</span>
                   </div>
                   {/* Number */}
-                  <div className='text-mainColor text-[38px] font-semibold'>13</div>
+                  <div className='text-mainColor text-[38px] font-semibold'>{checkOuts}</div>
                 </div>
                 {/* In Hotel */}
                 <div className='flex justify-center items-start gap-3'>
@@ -102,7 +227,7 @@ function Dashboard() {
                     <span className='text-xl text-black'>In hotel</span>
                   </div>
                   {/* Number */}
-                  <div className='text-mainColor text-[38px] font-semibold'>60</div>
+                  <div className='text-mainColor text-[38px] font-semibold'>{totalRooms}</div>
                 </div>
                 {/* Total Available Room */}
                 <div className='flex justify-center items-start gap-3'>
@@ -112,7 +237,7 @@ function Dashboard() {
                     <span className='text-xl text-black'>Available room</span>
                   </div>
                   {/* Number */}
-                  <div className='text-mainColor text-[38px] font-semibold'>10</div>
+                  <div className='text-mainColor text-[38px] font-semibold'>{availableRooms}</div>
                 </div>
                 {/* Total Occupied Room */}
                 <div className='flex justify-center items-start gap-3'>
@@ -122,7 +247,7 @@ function Dashboard() {
                     <span className='text-xl text-black'>Occupied room</span>
                   </div>
                   {/* Number */}
-                  <div className='text-mainColor text-[38px] font-semibold'>90</div>
+                  <div className='text-mainColor text-[38px] font-semibold'>{occupiedRooms}</div>
                 </div>
               </div>
             </div>
@@ -133,30 +258,30 @@ function Dashboard() {
                 {/* Single Sharing */}
                 <div className="card w-fit bg-base-100 shadow-xl px-16 py-7">
                   <span className='bg-green-500 text-green-800 w-fit px-2 rounded-lg'>2 Deals</span>
-                    <h2 className="card-title mt-3 mb-2">Single Sharing</h2>
+                    <h2 className="card-title mt-3 mb-2">double</h2>
                     <span className='text-xl font-medium text-gray-700'><span className='text-2xl font-semibold'>2</span>/30</span>
-                    <div className='text-base font-medium'><span className='text-mainColor font-bold text-3xl mt-3'>$568</span>/day</div>
+                    <div className='text-base font-medium'><span className='text-mainColor font-bold text-3xl mt-3'>{doublePrice}</span>/day</div>
                 </div>
                 {/* Single Sharing */}
                 <div className="card w-fit bg-base-100 shadow-xl px-16 py-7">
                   <span className='bg-green-500 text-green-800 w-fit px-2 rounded-lg'>2 Deals</span>
-                    <h2 className="card-title mt-3 mb-2">Single Sharing</h2>
+                    <h2 className="card-title mt-3 mb-2">familly</h2>
                     <span className='text-xl font-medium text-gray-700'><span className='text-2xl font-semibold'>2</span>/30</span>
-                    <div className='text-base font-medium'><span className='text-mainColor font-bold text-3xl mt-3'>$568</span>/day</div>
+                    <div className='text-base font-medium'><span className='text-mainColor font-bold text-3xl mt-3'>{familyPrice}</span>/day</div>
                 </div>
                 {/* Single Sharing */}
                 <div className="card w-fit bg-base-100 shadow-xl px-20 py-7">
                   <span className='bg-green-500 text-green-800 w-fit px-2 rounded-lg'>2 Deals</span>
-                    <h2 className="card-title mt-3 mb-2">Single Sharing</h2>
+                    <h2 className="card-title mt-3 mb-2">standard</h2>
                     <span className='text-xl font-medium text-gray-700'><span className='text-2xl font-semibold'>2</span>/30</span>
-                    <div className='text-base font-medium'><span className='text-mainColor font-bold text-3xl mt-3'>$568</span>/day</div>
+                    <div className='text-base font-medium'><span className='text-mainColor font-bold text-3xl mt-3'>{standardPrice}</span>/day</div>
                 </div>
                 {/* Single Sharing */}
                 <div className="card w-fit bg-base-100 shadow-xl px-16 py-7">
                   <span className='bg-green-500 text-green-800 w-fit px-2 rounded-lg'>2 Deals</span>
-                    <h2 className="card-title mt-3 mb-2">Single Sharing</h2>
+                    <h2 className="card-title mt-3 mb-2">suite</h2>
                     <span className='text-xl font-medium text-gray-700'><span className='text-2xl font-semibold'>2</span>/30</span>
-                    <div className='text-base font-medium'><span className='text-mainColor font-bold text-3xl mt-3'>$568</span>/day</div>
+                    <div className='text-base font-medium'><span className='text-mainColor font-bold text-3xl mt-3'>{suitePrice}</span>/day</div>
                 </div>
               </div>
             </div>

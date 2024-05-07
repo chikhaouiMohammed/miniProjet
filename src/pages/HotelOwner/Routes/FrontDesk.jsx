@@ -1,6 +1,9 @@
 import { ImageList, ImageListItem } from '@mui/material';
-import React, { useState } from 'react';
-
+import React, { useState,useContext,useEffect } from 'react';
+import { db } from "../../../Data/Firebase";
+import { collection, doc, getDoc, getDocs, query, where,setDoc } from 'firebase/firestore';
+import { AuthContext } from "../../../context/AuthContext";
+import { getStorage, ref, getDownloadURL, uploadBytes } from 'firebase/storage';
 function FrontDesk() {
 
   const [rating, setRating] = useState(3); 
@@ -10,57 +13,113 @@ function FrontDesk() {
     setRating(parseInt(event.target.value)); 
     
   };
-  const itemData = [
-    {
-      img: 'https://images.unsplash.com/photo-1549388604-817d15aa0110',
-      title: 'Bed',
-    },
-    {
-      img: 'https://images.unsplash.com/photo-1525097487452-6278ff080c31',
-      title: 'Books',
-    },
-    {
-      img: 'https://images.unsplash.com/photo-1523413651479-597eb2da0ad6',
-      title: 'Sink',
-    },
-    {
-      img: 'https://images.unsplash.com/photo-1563298723-dcfebaa392e3',
-      title: 'Kitchen',
-    },
-    {
-      img: 'https://images.unsplash.com/photo-1588436706487-9d55d73a39e3',
-      title: 'Blinds',
-    },
-    {
-      img: 'https://images.unsplash.com/photo-1574180045827-681f8a1a9622',
-      title: 'Chairs',
-    },
-    {
-      img: 'https://images.unsplash.com/photo-1530731141654-5993c3016c77',
-      title: 'Laptop',
-    },
-    {
-      img: 'https://images.unsplash.com/photo-1481277542470-605612bd2d61',
-      title: 'Doors',
-    },
-    {
-      img: 'https://images.unsplash.com/photo-1517487881594-2787fef5ebf7',
-      title: 'Coffee',
-    },
-    {
-      img: 'https://images.unsplash.com/photo-1516455207990-7a41ce80f7ee',
-      title: 'Storage',
-    },
-    {
-      img: 'https://images.unsplash.com/photo-1597262975002-c5c3b14bbd62',
-      title: 'Candle',
-    },
-    {
-      img: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4',
-      title: 'Coffee table',
-    },
-  ];
+  
+  const [hotelInfo, setHotelInfo] = useState({
+    name: '',
+    mapLink: '',
+    phoneNumber: '',
+    facebookLink: '',
+    instagramLink: '',
+    xLink: '',
+  });
 
+  const [hotelImages, setHotelImages] = useState([]);
+  const [businessFacilitiesImages, setBusinessFacilitiesImages] = useState([]);
+  const [restaurentsImages, setRestaurentsImages] = useState([]);
+
+  const { currentUser } = useContext(AuthContext);
+  const email = currentUser ? currentUser.email : '';
+  console.log(email);
+
+  useEffect(() => {
+    const fetchHotelData = async () => {
+      try {
+        const hotelRef = doc(db, 'hotelList', 'Tlemcen', 'hotels', email);
+        const hotelDoc = await getDoc(hotelRef);
+        if (hotelDoc.exists()) {
+          const data = hotelDoc.data();
+        
+          setHotelInfo(data);
+          if (data && data.HotelImages) {
+            const storage = getStorage();
+            if (data.HotelImages['Internal&External']) {
+              const imageUrls = data.HotelImages['Internal&External'];
+              const internalExternalImages = await Promise.all(imageUrls.map(async (imageUrl) => {
+                const imageRef = ref(storage, imageUrl);
+                return getDownloadURL(imageRef);
+              }));
+              setHotelImages(internalExternalImages);
+            }
+            if (data.HotelImages['businessFacilities']) {
+              const imageUrls = data.HotelImages['businessFacilities'];
+              const businessFacilities = await Promise.all(imageUrls.map(async (imageUrl) => {
+                const imageRef = ref(storage, imageUrl);
+                return getDownloadURL(imageRef);
+              }));
+              setBusinessFacilitiesImages(businessFacilities);
+            }
+            if (data.HotelImages['restaurents']) {
+              const imageUrls = data.HotelImages['restaurents'];
+              const restaurents = await Promise.all(imageUrls.map(async (imageUrl) => {
+                const imageRef = ref(storage, imageUrl);
+                return getDownloadURL(imageRef);
+              }));
+              setRestaurentsImages(restaurents);
+            }
+          }
+        } else {
+          console.log('Hotel document not found');
+        }
+      } catch (error) {
+        console.error('Error fetching hotel data:', error);
+      }
+    };
+
+    if (email) {
+      fetchHotelData();
+    }
+  }, [email]);
+  
+  const storage = getStorage();
+  
+const handleImageChange = async (e) => {
+  const files = e.target.files;
+  
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    
+    try {
+     
+      const storageRef = ref(storage, `images/${currentUser.uid}/${file.name}`);
+      await uploadBytes(storageRef, file);
+      const imageUrl = await getDownloadURL(storageRef);
+
+      
+      const hotelRef = doc(db, 'hotelList', 'Tlemcen', 'hotels', currentUser.email);
+      await setDoc(hotelRef, {
+        HotelImages: {
+          ...hotelInfo.HotelImages,
+          [file.name]: imageUrl 
+        }
+      }, { merge: true }); // Merge the new data with existing data instead of overwriting
+
+     
+      setHotelImages((prevImages) => [...prevImages, imageUrl]);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    }
+  }
+};
+ 
+ const updateHotelData = async () => {
+  try {
+    const hotelRef = doc(db, 'hotelList', 'Tlemcen', 'hotels', email);
+    await setDoc(hotelRef, hotelInfo, { merge: true }); // Merge the new data with existing data instead of overwriting
+    console.log('Hotel data updated successfully!');
+  } catch (error) {
+    console.error('Error updating hotel data:', error);
+  }
+};
   return (
     <div className="font-poppins w-full p-10">
       <div className='w-full p-5'>
@@ -78,7 +137,7 @@ function FrontDesk() {
             <div className="label">
                 <span className="label-text text-2xl font-semibold">What is your hotel name?</span>
             </div>
-            <input type="text" placeholder="Type here" className="input input-bordered input-accent w-full max-w-xs" />
+            <input type="text" placeholder="Type here" className="input input-bordered input-accent w-full max-w-xs" value={hotelInfo.name} onChange={(e) => setHotelInfo({ ...hotelInfo, name: e.target.value })}  />
             </label>
             {/* Hotel rating */}
             <div className="flex flex-col justify-center gap-4 items-start my-5">
@@ -114,7 +173,7 @@ function FrontDesk() {
             </div>
             {/* Hotel Speaking Languages */}
             <div className="form-control w-[300px] my-5">
-                <div className="text-2xl font-semibold mb-4">What is the hotel services?</div>
+                <div className="text-2xl font-semibold mb-4">What is the hotel  Languages ?</div>
                 <label className="cursor-pointer label">
                     <span className="label-text">English</span>
                     <input type="checkbox" defaultChecked className="checkbox checkbox-success" />
@@ -151,7 +210,7 @@ function FrontDesk() {
                 <div className="label">
                     <span className="label-text text-lg font-semibold my-3">Google map link</span>
                 </div>
-                <input type="text" placeholder="Type here" className="input input-bordered input-accent w-full max-w-xs" />
+                <input type="text" placeholder="Type here" className="input input-bordered input-accent w-full max-w-xs" value={hotelInfo.mapLink}onChange={(e) => setHotelInfo({ ...hotelInfo, mapLink: e.target.value })}  />
                 </label>
             </div>
             {/* Contact Information */}
@@ -161,43 +220,70 @@ function FrontDesk() {
                     <div className="label">
                         <span className="label-text text-lg font-semibold my-3">Phone Number:</span>
                     </div>
-                    <input type="text" placeholder="Type here" className="input input-bordered input-accent w-full max-w-xs" />
+                    <input type="text" placeholder="Type here" className="input input-bordered input-accent w-full max-w-xs" value={hotelInfo.phone} onChange={(e) => setHotelInfo({ ...hotelInfo, phone: e.target.value })}  />
                 </label>
                 <label className="form-control w-full max-w-xs">
                     <div className="label">
                         <span className="label-text text-lg font-semibold my-3">Facebook Link:</span>
                     </div>
-                    <input type="text" placeholder="Link here" className="input input-bordered input-accent w-full max-w-xs" />
+                    <input type="text" placeholder="Link here" className="input input-bordered input-accent w-full max-w-xs " value={hotelInfo.facebook} onChange={(e) => setHotelInfo({ ...hotelInfo, facebook: e.target.value })} />
                 </label>
                 <label className="form-control w-full max-w-xs">
                     <div className="label">
                         <span className="label-text text-lg font-semibold my-3">Instagram Link:</span>
                     </div>
-                    <input type="text" placeholder="Link here" className="input input-bordered input-accent w-full max-w-xs" />
+                    <input type="text" placeholder="Link here" className="input input-bordered input-accent w-full max-w-xs"  value={hotelInfo.instagrame}onChange={(e) => setHotelInfo({ ...hotelInfo, instagrame: e.target.value })}  />
                 </label>
                 <label className="form-control w-full max-w-xs">
                     <div className="label">
                         <span className="label-text text-lg font-semibold my-3">X Link:</span>
                     </div>
-                    <input type="text" placeholder="Link here" className="input input-bordered input-accent w-full max-w-xs" />
+                    <input type="text" placeholder="Link here" className="input input-bordered input-accent w-full max-w-xs" value={hotelInfo.X_Link} onChange={(e) => setHotelInfo({ ...hotelInfo, X_Link: e.target.value })} />
                 </label>
             </div>
         </div>
         {/* Hotel Images */}
         <div>
-            <h2 className='font-bold text-3xl text-center mb-10'>Hotel Images</h2>
+          
+            <h2 className='font-bold text-3xl text-center mb-10'>Internal&External</h2>
             <ImageList variant="masonry" cols={3} gap={8}>
-            {itemData.map((item) => (
-                <ImageListItem key={item.img}>
+            {hotelImages.map((imageUrl, index) => (
+              <ImageListItem key={index}>
                 <img
-                    srcSet={`${item.img}?w=248&fit=crop&auto=format&dpr=2 2x`}
-                    src={`${item.img}?w=248&fit=crop&auto=format`}
-                    alt={item.title}
-                    loading="lazy"
+                  src={imageUrl}
+                  alt={`Hotel Image ${index + 1}`}
+                  loading="lazy"
                 />
-                </ImageListItem>
+              </ImageListItem>
             ))}
-            </ImageList>
+          </ImageList>
+          {/* Display business facilities images */}
+          <h2 className='font-bold text-3xl text-center mb-10 mt-10'>Business Facilities Images</h2>
+          <ImageList variant="masonry" cols={3} gap={8}>
+            {businessFacilitiesImages.map((imageUrl, index) => (
+              <ImageListItem key={index}>
+                <img
+                  src={imageUrl}
+                  alt={`Business Facility Image ${index + 1}`}
+                  loading="lazy"
+                />
+              </ImageListItem>
+            ))}
+          </ImageList>
+          {/* Display restaurents images */}
+          <h2 className='font-bold text-3xl text-center mb-10 mt-10'>Restaurents Images</h2>
+          <ImageList variant="masonry" cols={3} gap={8}>
+            {restaurentsImages.map((imageUrl, index) => (
+              <ImageListItem key={index}>
+                <img
+                  src={imageUrl}
+                  alt={`Restaurent Image ${index + 1}`}
+                  loading="lazy"
+                />
+              </ImageListItem>
+            ))}
+          </ImageList>
+            <input type="file" className="file-input file-input-bordered file-input-success w-full max-w-xs mt-8 mb-8 " onChange={handleImageChange}  />
             {/* About & Policy */}
             <div>
               {/* About */}
@@ -213,7 +299,7 @@ function FrontDesk() {
         </div>
         
       </div>
-      <div className='w-full flex justify-center items-center'><button className="btn btn-outline btn-success my-10">Register</button></div>
+      <div className='w-full flex justify-center items-center'><button className="btn btn-outline btn-success my-10"onClick={updateHotelData}  >Register</button></div>
       
     </div>
   );

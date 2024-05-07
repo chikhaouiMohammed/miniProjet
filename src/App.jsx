@@ -58,7 +58,7 @@ function App() {
             <Route path="/" element={<Landing/>} />
             <Route path="/login" element={<SignIn />} />
             <Route path="/register" element={<SignUp />} />
-
+            <Route path="/accountUser/User" element={<User />} />
             <Route path="/secreter/new-user" element={<NewUser/>} />
             <Route path="/payment" element={<RequireAuth><RequireRole requiredRole="guest"><Payment /></RequireRole></RequireAuth>} />
             <Route path="/hotel-search" element={<RequireAuth><RequireRole requiredRole="guest"><HotelSearch /></RequireRole></RequireAuth>} />
