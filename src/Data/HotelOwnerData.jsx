@@ -14,3 +14,5 @@ export const hotelTotalRevenue = [
     { id: 11, month: "November", revenue: 159 },
     { id: 12, month: "December", revenue: 400 }
 ]
+
+

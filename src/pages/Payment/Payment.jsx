@@ -1,13 +1,6 @@
 
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { useContext, useState } from 'react';
-import ReactCountryFlag from "react-country-flag"
 import userImg from '../../images/Ellipse 437.png'
-import firstHotelImg from '../../images/Home/paymentPage/HotelImages/image 33.png'
-import secondHotelImg from '../../images/Home/paymentPage/HotelImages/image 34.png'
-import thirdHotelImg from '../../images/Home/paymentPage/HotelImages/image 35.png'
-import fourthHotelImg from '../../images/Home/paymentPage/HotelImages/image 5.png'
 import LinearProgress from '@mui/material/LinearProgress';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import  './Payment.css'
@@ -21,8 +14,6 @@ import bascketicon from '../../icons/Sports/play-basketball.png'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs from 'dayjs';
-import userImg2 from '../../images/Ellipse 437.png'
 import EditIcon from '@mui/icons-material/Edit';
 import DirectionsCarFilledOutlinedIcon from '@mui/icons-material/DirectionsCarFilledOutlined';
 import EditRoundedIcon from '@mui/icons-material/EditRounded';
@@ -48,11 +39,11 @@ function Payment() {
     const [fullName, setfullName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
-    const [Country, setCountry] = useState('');
+    const [country, setcountry] = useState('');
     const navigate = useNavigate();
     const { state } = useLocation()
     const userEmail = state.email
-    const roomPrice = state.price
+    const totalPrice = state.price
     const hotelEmail = state.hotelEmail
     const roomType = state.roomName
     const fromGuest = state.bool
@@ -76,7 +67,7 @@ function Payment() {
 
 const handleAddReservation = async () => {
     if (fromGuest) {
-        if (fullName && email && phone && Country && checkInDate && checkOutDate && cardDetails) {
+        if (fullName && email && phone && country && checkInDate && checkOutDate && cardDetails) {
             try {
                 const reservationDb = {
                     fullName,
@@ -85,8 +76,9 @@ const handleAddReservation = async () => {
                     phone,
                     checkInDate: checkInDate.$d,
                     checkOutDate: checkOutDate.$d,
-                    Country,
+                    country,
                     roomType,
+                    totalPrice,
                     cardDetails
                 };
 
@@ -105,7 +97,7 @@ const handleAddReservation = async () => {
                         // If the reservation array doesn't exist yet, create a new one with the reservation
                         await setDoc(hotelDocRef, { reservation: [reservationDb] }, { merge: true });
                     }
-                    navigate('/')
+                    navigate('/hotel-search')
                 } else {
                     console.error("Hotel document does not exist!");
                 }
@@ -262,7 +254,7 @@ return (
                         </div>
                         <div className='flex justify-between space-x-[100px] mt-8'>
                         <h4 className='text-base font-semibold'>Total Amount for Payment</h4>
-                        <span className='text-2xl font-bold text-mainColor'>{roomPrice} DZD </span>
+                        <span className='text-2xl font-bold text-mainColor'>{totalPrice} DZD </span>
                         </div>
                     </div>
                     {/*Cancellation Policy */}
@@ -373,8 +365,8 @@ return (
                         <h4 className='font-normal text-sm mt-2'>Choose your curent country :</h4>
                     </div>
                     <div className='mt-4'>
-                        <h4 className='font-medium text-base mb-2'>Country/Region</h4>
-                        <input type="text" value={reservation?.country} id="" placeholder='your country' onChange={(e) => setCountry(e.target.value)} className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
+                        <h4 className='font-medium text-base mb-2'>country/Region</h4>
+                        <input type="text" value={reservation?.country} id="" placeholder='your country' onChange={(e) => setcountry(e.target.value)} className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
                     </div>
                     
                 </div>

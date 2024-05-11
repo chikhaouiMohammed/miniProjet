@@ -68,6 +68,7 @@ function App() {
             <Route path="/hotel-owner" element={<RequireAuth><RequireRole requiredRole="hotel-owner"><HotelOwner /></RequireRole></RequireAuth>} />
             <Route path="/hotel-secreter" element={<RequireAuth><RequireRole requiredRole="hotel-secreter"><Secretaire /></RequireRole></RequireAuth>} />
             <Route path="/admin" element={<RequireAuth><RequireRole requiredRole="admin"><Admin chartData={visitors} /></RequireRole></RequireAuth>} />
+            <Route path="/admin" element={<RequireAuth><RequireRole requiredRole="admin"></RequireRole></RequireAuth>} />
           </Routes>
         </ReservationProvider>
       </BrowserRouter>

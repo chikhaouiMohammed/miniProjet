@@ -1,22 +1,36 @@
-import ReactCountryFlag from "react-country-flag"
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { useState,useContext } from "react";
-import userImg from '../../images/Home/paymentPage/alexander-hipp-iEEBWgY_6lA-unsplash.jpg'
+import { useState,useContext, useEffect } from "react";
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
 import ContactEmergencyOutlinedIcon from '@mui/icons-material/ContactEmergencyOutlined';
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import FmdGoodOutlinedIcon from '@mui/icons-material/FmdGoodOutlined';
 import './admin.css'
-import { Line } from "react-chartjs-2";
-import { Chart as ChartJS } from "chart.js/auto";
+import { Bar, Line  } from "react-chartjs-2";
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+)
+
 import { db } from "../../Data/Firebase";
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, doc, getDoc } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 import { Menu,MenuItem, IconButton } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import MenuIcon from '@mui/icons-material/Menu';
 import { AuthContext } from "../../context/AuthContext";
+import { updateTopCountry } from "./Data/TopContries";
+import { updateHotelRevenue } from "./Data/HotelRevenue";
+
+
+
+
+
+
 function Admin({ chartData }) {
     const [arrowStatus, setArrowStatus] = useState(false);
     const [language, setLanguage] = useState('EN');
@@ -24,6 +38,22 @@ function Admin({ chartData }) {
     const handleLanguageChange = (value) => {
         setLanguage(value);
     };
+    const [TopCountry, setTopCountry] = useState(null);
+    const [hotelRevenue, setHotelRevenue] = useState(null); 
+
+    useEffect(() => {
+      const fetchTopCountry = async () => {
+          const data = await updateTopCountry();
+          setTopCountry(data);
+      };
+      fetchTopCountry();
+
+      const fetchHotelRevenue = async () => {
+          const revenueData = await updateHotelRevenue();
+          setHotelRevenue(revenueData);
+      };
+      fetchHotelRevenue();
+  }, []);
     const options = {
         plugins: {
           legend: false
@@ -42,7 +72,7 @@ function Admin({ chartData }) {
           }
         }
       };
-      const { currentUser } = useContext(AuthContext);
+  const { currentUser } = useContext(AuthContext);
   const email = currentUser ? currentUser.email : '';
   console.log(email)
       const [hotelName, setHotelName] = useState("Zianide"); 
@@ -221,10 +251,24 @@ function Admin({ chartData }) {
                         <div className="flex justify-center items-center gap-2 text-base"><span className="text-black font-semibold">Location:</span><a href="" className="text-blue-600 font-medium">Location Link</a></div>
                     </div>
                 </div>
-                <div className="text-center my-10 font-semibold text-xl">Total Visitors</div>
+                <h3 className="text-center text-black my-10 font-bold text-2xl">Total Visitors</h3> 
                 {/* Line Chart Dashboard */}
-                <div className="w-full mt-10">
+                <div className="w-full my-10">
                     <Line style={{width:"100%"}} data={chartData} options={options}/>
+                </div>
+                <div className="flex justify-center items-center gap-7">
+                  {/* Top Contries */}
+
+                  <div className="w-full">
+                    <h3 className="text-center text-black font-bold text-2xl">Top Countries</h3>
+                    {TopCountry && <Bar style={{ width: "90%", height: '500px' }} data={TopCountry} />}
+                  </div>
+
+                  {/* Hotel Revenue */}
+                  <div className="w-full">
+                      <h3 className="text-center text-black font-bold text-2xl">Hotel Revenue </h3>
+                     { hotelRevenue && <Bar style={{width: "90%", height:'500px'}} data={hotelRevenue}/>}
+                  </div>
                 </div>
             </div>
         </div>
