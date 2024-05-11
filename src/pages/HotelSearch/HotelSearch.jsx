@@ -1,5 +1,3 @@
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -9,25 +7,18 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import ListItemText from '@mui/material/ListItemText';
 import Select from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
-import ReactCountryFlag from "react-country-flag"
-import userImg from '../../images/Home/paymentPage/alexander-hipp-iEEBWgY_6lA-unsplash.jpg'
 import './hotelSearch.css'
 import { Box, FormControlLabel, FormGroup, Rating, Slider } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import LocationOnSharpIcon from '@mui/icons-material/LocationOnSharp';
-import FreeBreakfastIcon from '@mui/icons-material/FreeBreakfast';
 import SearchIcon from '@mui/icons-material/Search';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-// images
-import firstImg from '../../images/HotelSearchPage/Rectangle 3.png'
-import secondImg from '../../images/HotelSearchPage/Rectangle 3 (1).png'
-import thirdImg from '../../images/HotelSearchPage/Rectangle 3 (2).png'
-import fourthImg from '../../images/HotelSearchPage/Rectangle 3 (3).png'
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../Data/Firebase';
+import { useTheme } from '@mui/material/styles';
+import { Link } from 'react-router-dom';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -41,16 +32,12 @@ const MenuProps = {
 };
 
 const roomTypes = [
-  'Standard',
+  'standard',
   'double',
-  'family',
+  'familly',
   'suite'
 ];
-const destinations = [
-    'Tlemcen',
-    'Oran',
-    'Algiers'
-]
+
 const labels = {
     1: '1',
     2: '2',
@@ -58,6 +45,14 @@ const labels = {
     4: '4',
     5: '5',
   };
+  function getStyles(name, roomTypeFilter, theme) {
+    return {
+      fontWeight:
+        roomTypeFilter.indexOf(name) === -1
+          ? theme.typography.fontWeightRegular
+          : theme.typography.fontWeightMedium,
+    };
+  }
 function getLabelText(value) {
     return `${value} Star${value !== 1 ? 's' : ''}, ${labels[value]}`;
   }
@@ -70,10 +65,11 @@ function HotelSearch() {
     const [filteredHotels, setFilteredHotels] = useState([]);
     const [roomTypeFilter, setRoomTypeFilter] = useState([]);
     const [priceRange, setPriceRange] = useState([2000, 20000]);
-    const [value, setValue] = useState(2); // Define state for rating value
-    const [hover, setHover] = useState(-1); // Define state for hover value
+    const [value, setValue] = useState(2); 
+    const [hover, setHover] = useState(-1);
+    const theme = useTheme(); 
 
-
+    console.log(roomTypeFilter)
   
     useEffect(() => {
       async function fetchHotels() {
@@ -123,7 +119,7 @@ function HotelSearch() {
   
     useEffect(() => {
       filterHotels();
-    }, [roomTypeFilter, priceRange]);
+    }, [roomTypeFilter, priceRange, handleSearch]);
   
     const filterHotels = () => {
       let filtered = [...hotels];
@@ -147,13 +143,23 @@ function HotelSearch() {
     };
   
     const handleRoomTypeChange = (event) => {
-      setRoomTypeFilter(event.target.value);
+        const {
+            target: { value },
+          } = event;
+          setRoomTypeFilter(
+            // On autofill we get a stringified value.
+            typeof value === 'string' ? value.split(',') : value,
+          );
     };
   
     const handlePriceChange = (event, newValue) => {
       setPriceRange(newValue);
     };
-    console.log(filteredHotels)
+    console.log(hotels)
+
+    function handleSearch () {
+        console.log("clicked")
+    }
 
   return (
     <div className='font-poppins text-mainTextColor'>
@@ -239,28 +245,30 @@ function HotelSearch() {
                 </div>
                 {/* Room Type */}
                 <div className='w-fit'>
-                    <FormControl fullWidth sx={{ m: 1, width: 300 }}>
-                        <InputLabel id="demo-multiple-checkbox-label">Room Types</InputLabel>
+                    <FormControl sx={{ m: 1, width: 300 }}>
+                        <InputLabel id="demo-multiple-name-label">Room Type</InputLabel>
                         <Select
-                        labelId="demo-multiple-checkbox-label"
-                        id="demo-multiple-checkbox"
+                        labelId="demo-multiple-name-label"
+                        id="demo-multiple-name"
                         multiple
-                        value={roomTypes}
+                        value={roomTypeFilter}
                         onChange={handleRoomTypeChange}
-                        input={<OutlinedInput label="Room Types" />}
-                        renderValue={(selected) => selected.join(', ')}
+                        input={<OutlinedInput label="Name" />}
                         MenuProps={MenuProps}
                         >
-                        {roomTypes.map((name) => (
-                            <MenuItem key={name} value={name}>
-                            <Checkbox checked={roomTypes.indexOf(name) > -1} />
-                            <ListItemText primary={name} />
+                        {roomTypes.map((roomType) => (
+                            <MenuItem
+                            key={roomType}
+                            value={roomType}
+                            style={getStyles(roomType, roomTypeFilter, theme)}
+                            >
+                            {roomType}
                             </MenuItem>
                         ))}
                         </Select>
                     </FormControl>
                 </div>
-                <div className='bg-mainColor px-[16px] py-[14px] rounded-md cursor-pointer transition-all duration-300 hover:bg-transparent border-solid border-mainColor border-[2px] '><div className='text-black'><SearchIcon/></div></div>
+                <div onClick={handleSearch} className='bg-mainColor px-[16px] py-[14px] rounded-md cursor-pointer transition-all duration-300 hover:bg-transparent border-solid border-mainColor border-[2px] '><div className='text-black'><SearchIcon/></div></div>
             </div>
             {/* Hotels and filter  */}
             <div className=' w-full mt-10 flex justify-center items-start gap-5'>
@@ -386,67 +394,71 @@ function HotelSearch() {
                         </div>
                     </div>
                     {/* Hotels Cards */}
-                    <div className='flex flex-col justify-center items-center w-full mt-14 gap-10'>
-                        {/* Map through filtered hotels and generate hotel cards */}
-                        {filteredHotels.map((hotel) => (
-    <div key={hotel.id} className='w-full flex justify-center items-start rounded-2xl overflow-hidden box-shadow-two'>
-        {/* image */}
-        <div className='flex-shrink-0 w-[300px] h-[300px]'>
-            {/* You can render hotel images dynamically from the hotel data */}
-            {hotel.rooms && hotel.rooms.length > 0 && (
-                <img className='w-full h-full' src={hotel.rooms[0].images[0]} alt={hotel.name} />
-            )}
-        </div>
-        {/* info */}
-        <div className='w-full flex flex-col justify-center items-start px-[24px] py-[24px]'>
-            {/* Heading */}
-            <div className='w-full flex justify-between items-center'>
-                <h3 className='text-[20px] font-bold'>{hotel.name}</h3>
-                <div className='flex flex-col justify-center items-center'>
-                    <span>Starting from</span>
-                    <div className='font-bold text-[26px] text-mainColor'>{hotel.rooms[0].price} DZD/night</div>
-                </div>
+            <div className='flex flex-col justify-center items-center w-full mt-14 gap-10'>
+                {/* Map through filtered hotels and generate hotel cards */}
+                {filteredHotels.length > 0 ? (
+                    filteredHotels.map((hotel) => (
+                        <div key={hotel.id} className='w-full flex justify-center items-start rounded-2xl overflow-hidden box-shadow-two'>
+                            {/* image */}
+                            <div className='flex-shrink-0 w-[300px] h-[300px]'>
+                                {/* You can render hotel images dynamically from the hotel data */}
+                                {hotel.rooms && hotel.rooms.length > 0 && (
+                                    <img className='w-full h-full' src={hotel.rooms[0].images[0]} alt={hotel.name} />
+                                )}
+                            </div>
+                            {/* info */}
+                            <div className='w-full flex flex-col justify-center items-start px-[24px] py-[24px]'>
+                                {/* Heading */}
+                                <div className='w-full flex justify-between items-center'>
+                                    <h3 className='text-[20px] font-bold'>{hotel.name}</h3>
+                                    <div className='flex flex-col justify-center items-center'>
+                                        <span>Starting from</span>
+                                        <div className='font-bold text-[26px] text-mainColor'>{hotel.rooms[0].price} DZD/night</div>
+                                    </div>
+                                </div>
+                                {/* Card Info */}
+                                <div>
+                                    <div className='flex justify-start gap-2 items-center'>
+                                        <div><LocationOnSharpIcon/></div>
+                                        <div className='text-[13px]'>{hotel.location}</div>
+                                    </div>
+                                    {/* Rating */}
+                                    <div className='flex justify-center items-center gap-4'>
+                                        <div>
+                                            <Rating sx={{padding:0,margin:0}} size='large' name="read-only" value={hotel.rating} readOnly />
+                                            {hotel.rating} Stars Hotel
+                                        </div>
+                                        <div className='flex justify-center items-center gap-2'>
+                                            
+                                            
+                                        </div>
+                                    </div>
+                                    <div className='flex justify-start items-center gap-2 mt-2'>
+                                        <div className='py-[8.5px] px-[11px] rounded-lg bg-transparent border-solid border-[2px] border-mainColor text-[14px]'>{hotel.rating}</div>
+                                        <div className='font-bold text-[16px]'>
+                                            <span className='text-[#112211] text-[18px]'>Very Good</span> {hotel.reviews} reviews
+                                        </div>
+                                    </div>
+                                    {/* line */}
+                                </div>
+                                <div className='h-[1px] w-full mt-5 bg-gray-400'></div>
+                                {/* Buy & Favorite Button */}
+                                <div className='flex justify-center items-center gap-5 mt-3 w-full'>
+                                    <div className='flex-shrink-0 cursor-pointer w-[45px] h-[48px] flex justify-center items-center rounded-lg border-solid border-[2px] border-mainColor transition-all hover:bg-mainColor hover:border-transparent hover:text-white duration-300'>
+                                        <div><FavoriteIcon/></div>
+                                    </div>
+                                    <Link to="/hotel-search/hotel-profile" state={{email : hotel.email}} className='bg-mainColor w-full h-[48px] flex justify-center items-center rounded-lg font-semibold text-[16px] cursor-pointer transition-all duration-300 border-solid border-[2px] border-mainColor hover:bg-transparent'>
+                                        <div>Book Now</div>
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <p>No hotels found.</p>
+                )}
             </div>
-            {/* Card Info */}
-            <div>
-                <div className='flex justify-start gap-2 items-center'>
-                    <div><LocationOnSharpIcon/></div>
-                    <div className='text-[13px]'>{hotel.location}</div>
-                </div>
-                {/* Rating */}
-                <div className='flex justify-center items-center gap-4'>
-                    <div>
-                        <Rating sx={{padding:0,margin:0}} size='large' name="read-only" value={hotel.rating} readOnly />
-                        {hotel.rating} Stars Hotel
-                    </div>
-                    <div className='flex justify-center items-center gap-2'>
-                        
-                        
-                    </div>
-                </div>
-                <div className='flex justify-start items-center gap-2 mt-2'>
-                    <div className='py-[8.5px] px-[11px] rounded-lg bg-transparent border-solid border-[2px] border-mainColor text-[14px]'>{hotel.rating}</div>
-                    <div className='font-bold text-[16px]'>
-                        <span className='text-[#112211] text-[18px]'>Very Good</span> {hotel.reviews} reviews
-                    </div>
-                </div>
-                {/* line */}
-            </div>
-            <div className='h-[1px] w-full mt-5 bg-gray-400'></div>
-            {/* Buy & Favorite Button */}
-            <div className='flex justify-center items-center gap-5 mt-3 w-full'>
-                <div className='flex-shrink-0 cursor-pointer w-[45px] h-[48px] flex justify-center items-center rounded-lg border-solid border-[2px] border-mainColor transition-all hover:bg-mainColor hover:border-transparent hover:text-white duration-300'>
-                    <div><FavoriteIcon/></div>
-                </div>
-                <div className='bg-mainColor w-full h-[48px] flex justify-center items-center rounded-lg font-semibold text-[16px] cursor-pointer transition-all duration-300 border-solid border-[2px] border-mainColor hover:bg-transparent'>
-                    <div>Book Now</div>
-                </div>
-            </div>
-        </div>
-    </div>
-))}
 
-                    </div>
 
                     {/* Shw more results */}
                     <div className='text-white bg-mainColor py-[16px] text-center w-full rounded-lg mt-10 cursor-pointer'>Show more results</div>

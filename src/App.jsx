@@ -16,6 +16,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
 import NewUser from "./pages/User/NewUser";
 import { ReservationProvider } from "./context/ReservationDataContext";
+import HotelProfile from "./pages/HotelProfile/HotelProfile";
 
 function App() {
   const [visitors, setVisitors] = useState({
@@ -60,6 +61,8 @@ function App() {
             <Route path="/register" element={<SignUp />} />
             <Route path="/accountUser/User" element={<User />} />
             <Route path="/secreter/new-user" element={<NewUser/>} />
+            <Route path="/hotel-search/hotel-profile" element={<HotelProfile/>} />
+
             <Route path="/payment" element={<RequireAuth><RequireRole requiredRole="guest"><Payment /></RequireRole></RequireAuth>} />
             <Route path="/hotel-search" element={<RequireAuth><RequireRole requiredRole="guest"><HotelSearch /></RequireRole></RequireAuth>} />
             <Route path="/hotel-owner" element={<RequireAuth><RequireRole requiredRole="hotel-owner"><HotelOwner /></RequireRole></RequireAuth>} />

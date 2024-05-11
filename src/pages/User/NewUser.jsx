@@ -24,10 +24,10 @@ const NewUser = () => {
   const { currentUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const { dispatch } = useContext(AuthContext);
-  const secretrEmail = currentUser ? currentUser.email : '';
+  const secreterEmail = currentUser ? currentUser.email : '';
   const { setReservationData } = useReservation();
 
-  console.log(secretrEmail)
+  console.log(secreterEmail)
 
   useEffect(() => {
     const fetchHotelUserId = async () => {
@@ -73,8 +73,6 @@ const NewUser = () => {
   
     try {
       const hotelDocRef = doc(collection(db, "hotelList", "Tlemcen", "hotels"), hotelEmail);
-      
-     
       const hotelDocSnap = await getDoc(hotelDocRef);
       if (hotelDocSnap.exists()) {
         const hotelData = hotelDocSnap.data();

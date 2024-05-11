@@ -1,5 +1,7 @@
+import {db} from './Firebase'
+
 export const hotelTotalRevenue = [
-    { id: 1, month: "January", revenue: 100 },
+    { id: 1, month: "January", revenue: 100 }, 
     { id: 2, month: "February", revenue: 235  },
     { id: 3, month: "March", revenue: 175  },
     { id: 4, month: "April", revenue: 300  },

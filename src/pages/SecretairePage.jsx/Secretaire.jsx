@@ -1,20 +1,15 @@
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import React, { useContext, useEffect, useState } from 'react';
-import ReactCountryFlag from "react-country-flag"
-import userImg from '../../images/Ellipse 437.png'
 import './Secretaire.css'
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import KeyboardArrowUpOutlinedIcon from "@mui/icons-material/KeyboardArrowUpOutlined";
-import { DataGrid } from '@mui/x-data-grid';
-import { userColumns } from "../../Data/datatablesource";
 import { Link } from "react-router-dom";
 import {collection,getDocs,deleteDoc,doc, query, where, getDoc} from "firebase/firestore";
 import { db } from "../../Data/Firebase";
 import profileAvatar from '../../images/blank-profile-picture-973460_1280.png'
 import { AuthContext } from '../../context/AuthContext';
+import { useContext, useEffect, useState } from 'react';
 const Secretaire = () => {
 
   const { currentUser } = useContext(AuthContext);

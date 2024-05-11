@@ -34,18 +34,36 @@ import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import { useReservation } from '../../context/ReservationDataContext';
-import { AuthContext } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { collection, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../Data/Firebase';
 
 
 function Payment() {
-    const { currentUser } = useContext(AuthContext);
     const { reservation } = useReservation();
     const [cardDetails, setCardDetails] = useState({});
+    const [HotelImages, setHotelImages] = useState([]);
+    const [checkInDate, setCheckInDate] = useState(null);
+    const [checkOutDate, setCheckOutDate] = useState(null);
+    const [fullName, setfullName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [Country, setCountry] = useState('');
     const navigate = useNavigate();
+    const { state } = useLocation()
+    const userEmail = state.email
+    const roomPrice = state.price
+    const hotelEmail = state.hotelEmail
+    const roomType = state.roomName
+    const fromGuest = state.bool
+
+    const handleCheckInDateChange = (date) => {
+        setCheckInDate(date);
+      };
     
+      const handleCheckOutDateChange = (date) => {
+        setCheckOutDate(date);
+      };
 
   const handleCardDetails = (e) => {
     const { name, value } = e.target;
@@ -55,37 +73,54 @@ function Payment() {
     }));
     console.log(cardDetails)
 }
-  
-  const handlePayment = async () => {
-    try {
-      const hotelDocRef = doc(collection(db, "hotelList", "Tlemcen", "hotels"), reservation.hotelEmail);
-      const hotelDocSnap = await getDoc(hotelDocRef);
 
-      if (hotelDocSnap.exists()) {
-        const hotelData = hotelDocSnap.data();
-        
-        const updatedReservation = hotelData.reservation.map(reservationItem => {
-          if (
-            reservationItem.fullName === reservation.fullName &&
-            reservationItem.email === reservation.email
-          ) {
-            return { ...reservationItem, cardDetails: cardDetails };
-          } else {
-            return reservationItem;
-          }
-        });
+const handleAddReservation = async () => {
+    if (fromGuest) {
+        if (fullName && email && phone && Country && checkInDate && checkOutDate && cardDetails) {
+            try {
+                const reservationDb = {
+                    fullName,
+                    email,
+                    hotelEmail,
+                    phone,
+                    checkInDate: checkInDate.$d,
+                    checkOutDate: checkOutDate.$d,
+                    Country,
+                    roomType,
+                    cardDetails
+                };
 
-        await updateDoc(hotelDocRef, { reservation: updatedReservation });
+                const hotelDocRef = doc(collection(db, "hotelList", "Tlemcen", "hotels"), hotelEmail);
+                const hotelDocSnap = await getDoc(hotelDocRef);
 
-        navigate('/');
-      } else {
-        console.error("Hotel document does not exist!");
-      }
-    } catch (error) {
-      console.error("Error updating reservation:", error);
+                if (hotelDocSnap.exists()) {
+                    const hotelData = hotelDocSnap.data();
+                    
+                    if (hotelData.reservation) {
+                        // If the reservation array exists, add the new reservation to it
+                        await updateDoc(hotelDocRef, {
+                            reservation: [...hotelData.reservation, reservationDb]
+                        });
+                    } else {
+                        // If the reservation array doesn't exist yet, create a new one with the reservation
+                        await setDoc(hotelDocRef, { reservation: [reservationDb] }, { merge: true });
+                    }
+                    navigate('/')
+                } else {
+                    console.error("Hotel document does not exist!");
+                }
+            } catch(error) {
+                console.error("Error adding reservation:", error);
+            }
+        } else {
+            console.error("Please fill in all required fields.");
+            // Optionally, display an error message or take other actions
+        }
+    } else {
+        console.error("User is not from a guest. Reservation not allowed.");
+        // Optionally, display an error message or take other actions
     }
-  };
-
+};
 
 return (
 <div className=' container mx-auto font-poppins'>
@@ -108,23 +143,22 @@ return (
     </header>
 
       {/* payment page content */}
-        <div className='flex justify-between items-center  flex-nowrap  '>
+        <div className='flex justify-end gap-[20%] items-center  flex-nowrap  pb-40'>
         {/* left side */}
-        <div className='flex flex-col justify-center items-start '>
+        <div className='flex flex-col justify-center items-center '>
             {/* Hotel images & info */}
             <div className='flex justify-center items-start gap-4'>
                 {/* images */}
-                <div className='flex flex-col justify-center items-start gap-8'>
-                    <div className='rounded-xl overflow-hidden w-[142px] h-[120px] cursor-pointer'><img className='w-full h-full' src={firstHotelImg} alt="" /></div>
-                    <div className='rounded-xl overflow-hidden w-[142px] h-[120px] cursor-pointer'><img src={secondHotelImg} alt="" /></div>
-                    <div className='rounded-xl overflow-hidden w-[142px] h-[120px] cursor-pointer'><img src={thirdHotelImg} alt="" /></div>
-                    <div className='rounded-xl overflow-hidden w-[142px] h-[120px] cursor-pointer'><img src={fourthHotelImg} alt="" /></div>
-                </div>
+                {/* <div className='flex flex-col justify-center items-start gap-8'>
+                    <div className='rounded-xl overflow-hidden w-[142px] h-[120px] cursor-pointer'>
+                    <img className='w-full h-full' src={image} alt="" />
+                    </div>
+                </div> */}
                 {/* Info */}
-                <div className='' >
+                <div className='flex flex-col items-start justify-center' >
                     {/* headingg */}
                     <div className='text-black mb-4'>
-                        <h2 className='text-2xl font-bold'>First Hotel G</h2>
+                        <h2 className='text-2xl font-bold'>{roomType} room</h2>
                         <span className='text-[#565656] text-sm'>Modern Hotel at Gothenburg Central Station</span>
                     </div>
                     {/* Reviews Progress */}
@@ -195,13 +229,13 @@ return (
                             <div className='flex flex-col items-start '>
                             <h3 className='text-base font-bold'> check in</h3>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker />
+                                <DatePicker onChange={handleCheckInDateChange} />
                             </LocalizationProvider>
                             </div>
                             <div className='flex flex-col items-start '>
                             <h3 className='text-base font-bold'> check Out</h3>
                             <LocalizationProvider dateAdapter={AdapterDayjs}>
-                                <DatePicker />
+                                <DatePicker onChange={handleCheckOutDateChange} />
                             </LocalizationProvider>
                             </div>
                         </div>
@@ -228,7 +262,7 @@ return (
                         </div>
                         <div className='flex justify-between space-x-[100px] mt-8'>
                         <h4 className='text-base font-semibold'>Total Amount for Payment</h4>
-                        <span className='text-2xl font-bold text-mainColor'>11 111 DZD </span>
+                        <span className='text-2xl font-bold text-mainColor'>{roomPrice} DZD </span>
                         </div>
                     </div>
                     {/*Cancellation Policy */}
@@ -288,16 +322,10 @@ return (
             </div>
         </div>
         {/* right side */}
-        <div className='flex flex-col justify-center items-start  '>
+        <div className='flex flex-col justify-center items-center  '>
             <div className='flex justify-between gap-8'>
             <div className='flex justify-center items-center gap-4'>
-                {/* user image */}
-                <div className='w-[50px] h-[50px] overflow-hidden rounded-full cursor-pointer'><img className=' w-full h-full' src={userImg2} alt="" /></div>
-                {/* info */}
-                <div className='flex flex-col justify-center items-center gap-[1px] text-mainTextColor '>
-                    <h4 className='font-extrabold text-[16px]'>Anna Carinna</h4>
-                    <span className='text-[14px] '>easyset24@gmail.com</span>
-                </div>
+                                
             </div>
             <div className='w-full h-full bg-white rounded border border-mainColor flex justify-center items-center '>
             <h3 className='text-mainColor text-base font-medium capitalize leading-snug pt-4 pb-4 pl-4 pr-4'> Check Your Booking Story</h3>
@@ -324,20 +352,20 @@ return (
                 <i><EditIcon/></i>
                 <span className=' text-mainColor text-sm font-normal'>Edit Your Profil</span>
                 </div>
-                <div>
+                <div className='w-full flex justify-center items-start flex-col'>
                     <h3 className='font-bold text-2xl mt-8'>Full Name</h3>
                     <div className='flex items-center justify-start gap-4 mt-3 '>
-                    <input type="text" value={reservation?.fullName || ''} placeholder='Full Name' className=' rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' required />
+                    <input id='fullName' type="text" value={reservation?.fullName} placeholder='Full Name' onChange={(e)=>{setfullName(e.target.value)}} className=' rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' required />
 
                     </div>
                     <div className='flex justify-between gap-4 mt-4'>
                         <div>
                         <h3 className='font-medium text-base'>Email Adress</h3>
-                        <input type="email" value={reservation.email} id="" placeholder='your email ' className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
+                        <input id='email' type="email" value={reservation?.email}  placeholder='your email ' onChange={(e)=>{setEmail(e.target.value)}} className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' required />
                         </div>
                         <div>
                             <h3 className='font-medium text-base'>phone number</h3>
-                            <input type="text" name="" id="" placeholder='your phone number' className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
+                            <input type="text" name="" id="" placeholder='your phone number' onChange={(e) => setPhone(e.target.value)} className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
                         </div>
                     </div>
                     <div className='mt-7'>
@@ -346,7 +374,7 @@ return (
                     </div>
                     <div className='mt-4'>
                         <h4 className='font-medium text-base mb-2'>Country/Region</h4>
-                        <input type="text" value={reservation.country} id="" placeholder='your country' className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
+                        <input type="text" value={reservation?.country} id="" placeholder='your country' onChange={(e) => setCountry(e.target.value)} className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
                     </div>
                     
                 </div>
@@ -455,12 +483,12 @@ return (
                             <button className='bg-white rounded border border-mainColor flex justify-center items-center pt-3 pb-3 pl-4 pr-10 font-bold text-base text-mainColor'>Save in Shortcute</button>
                             <FavoriteBorderRoundedIcon className='absolute right-3 text-mainColor' />
                         </div>
-                        <button className='bg-mainColor rounded flex justify-center items-center pt-3 pb-3 pl-12 pr-12 font-bold text-base text-white' onClick={handlePayment}>Payment</button>
+                        <button className='bg-mainColor rounded flex justify-center items-center pt-3 pb-3 pl-12 pr-12 font-bold text-base text-white' onClick={handleAddReservation}>Payment</button>
                     </div>
                 </div>
         </div>
     </div>
-    </div>
+</div>
 )
 }
 
