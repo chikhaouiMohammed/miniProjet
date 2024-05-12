@@ -45,7 +45,7 @@ function Payment() {
     const userEmail = state.email
     const totalPrice = state.price
     const hotelEmail = state.hotelEmail
-    const roomType = state.roomName
+    const roomType = state.hotelName
     const fromGuest = state.bool
 
     const handleCheckInDateChange = (date) => {

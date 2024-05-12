@@ -20,6 +20,46 @@ const HotelProfile = () => {
   const [IsEnglish, setIsEnglish] = useState(true);
   const [IsFrench, setIsFrench] = useState(false);
   const [IsEspanol, setIsEspanol] = useState(false);
+  const [roomCounts, setRoomCounts] = useState({}); // State variable for room counts
+  const [totalPrice, setTotalPrice] = useState(0); // State variable for total price
+
+  // Increment room count
+  const incrementRoomCount = (roomName) => {
+    setRoomCounts(prevCounts => ({
+      ...prevCounts,
+      [roomName]: (prevCounts[roomName] || 0) + 1
+    }));
+  };
+
+  // Decrement room count
+  const decrementRoomCount = (roomName) => {
+    setRoomCounts(prevCounts => ({
+      ...prevCounts,
+      [roomName]: Math.max((prevCounts[roomName] || 0) - 1, 0)
+    }));
+  };
+
+  // Calculate total price based on room counts
+  useEffect(() => {
+    const totalPrice = calculateTotalPrice();
+    setTotalPrice(totalPrice);
+  }, [roomCounts, hotelData]);
+
+  const calculateTotalPrice = () => {
+    let totalPrice = 0;
+    // Check if hotelData.roomType is an object
+    if (typeof hotelData.roomType === 'object' && Object.keys(hotelData.roomType).length > 0) {
+      Object.keys(roomCounts).forEach(roomName => {
+        const roomCount = roomCounts[roomName];
+        const room = hotelData.roomType[roomName]; // Access room directly using roomName
+        if (room) {
+          totalPrice += room.price * roomCount;
+        }
+      });
+    }
+    return totalPrice;
+  };
+  
 
   useEffect(() => {
     const fetchHotelData = async () => {
@@ -27,7 +67,6 @@ const HotelProfile = () => {
         const hotelRef = doc(db, "hotelList", "Tlemcen", "hotels", hotelEmail);
         const hotelSnap = await getDoc(hotelRef);
         setHotelData(hotelSnap.data());
-        console.log(hotelSnap.data());
         dispatch({ type: "LOGIN", payload: { user: currentUser, role: "guest", email: currentUser.email } }); 
       } catch (error) {
         console.error('Error fetching hotel data:', error);
@@ -45,9 +84,6 @@ const HotelProfile = () => {
       setIsEspanol(hotelData.language.spanish || false);
     }
   }, [hotelData]);
-  
-
-  
 
   return (
     <div className="font-poppins container mx-auto text-black">
@@ -81,19 +117,19 @@ const HotelProfile = () => {
       <div className="px-[120px]">
         {/* Hotel Images */}
         <div className="mb-20">
-        {hotelData && hotelData.HotelImages && hotelData.HotelImages['Internal&External'] && (
+          {hotelData && hotelData.HotelImages && hotelData.HotelImages['Internal&External'] && (
             <ImageList sx={{ width: '100%', height: 450 }} cols={3} rowHeight={164}>
-                {hotelData.HotelImages['Internal&External'].map((imageUrl, index) => (
+              {hotelData.HotelImages['Internal&External'].map((imageUrl, index) => (
                 <ImageListItem key={index}>
-                    <img
+                  <img
                     src={imageUrl} // Use the imageUrl directly
                     alt={`Hotel Image ${index}`}
                     loading="lazy"
-                    />
+                  />
                 </ImageListItem>
-                ))}
+              ))}
             </ImageList>
-            )}
+          )}
         </div>
         {/* Hotel Details */}
         <div className="flex flex-col justify-center items-start gap-10">
@@ -102,7 +138,7 @@ const HotelProfile = () => {
             {/* You can render the rating based on hotelData.rating */}
             <input type="radio" name="rating-2" className="mask mask-star-2 bg-orange-400" />
             <input type="radio" name="rating-2" className="mask mask-star-2 bg-orange-400" />
-            <input type="radio" name="rating-2" className="mask mask-star-2 bg-orange-400" checked />
+            <input type="radio" name="rating-2" className="mask mask-star-2 bg-orange-400" defaultChecked />
             <input type="radio" name="rating-2" className="mask mask-star-2 bg-orange-400" />
             <input type="radio" name="rating-2" className="mask mask-star-2 bg-orange-400" />
           </div>
@@ -166,24 +202,27 @@ const HotelProfile = () => {
               {/* Room cards */}
               {hotelData && hotelData.roomType && Object.values(hotelData.roomType).map((room, index) => (
                 <div key={index} className="card w-96 bg-base-100 shadow-xl">
-                    <figure className='w-[384px] h-[256px]'><img className='w-full h-full' src={room.images[0]} alt="Room" /></figure>
-                    <div className="card-body">
+                  <figure className='w-[384px] h-[256px]'><img className='w-full h-full' src={room.images[0]} alt="Room" /></figure>
+                  <div className="card-body">
                     <h2 className="card-title">{room.name}</h2>
                     <p>Price: <span className='text-mainColor text-xl'>{room.price}</span></p>
-                    <div className="card-actions justify-end">
-                        <Link to="/payment" state={{email: userEmail, price: room.price, roomName: room.name, hotelEmail: hotelEmail, bool: true}} className="btn btn-primary">Buy Now</Link>
+                    <div className="card-actions flex justify-between items-center">
+                      <button onClick={() => decrementRoomCount(room.name)} className="btn btn-outline btn-error">-</button>
+                      <span>{roomCounts[room.name] || 0}</span>
+                      <button onClick={() => incrementRoomCount(room.name)} className="btn btn-outline btn-accent">+</button>
                     </div>
-                    </div>
+                  </div>
                 </div>
-                ))}
-
-
+              ))}
             </div>
           </div>
         </div>
       </div>
+      {/* Display total price */}
+      <div className='font-semibold text-center my-5 w-full'>Total Price: {totalPrice}</div>
+      <Link to="/payment" state={{email: userEmail, price: totalPrice, hotelName:hotelData.name,  hotelEmail: hotelEmail, bool: true}} className="btn btn-primary">Buy Now</Link>
     </div>
   );
-}  
+};
 
 export default HotelProfile;
