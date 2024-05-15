@@ -4,7 +4,7 @@ import { db } from "../../../Data/Firebase";
 export async function updateTopCountry() {
     try {
         // Reference to the hotel document (replace 'ibis13@gmail.com' with your hotel document ID)
-        const hotelRef = doc(collection(db, "hotelList", "Tlemcen", "hotels"), "ibis13@gmail.com");
+        const hotelRef = doc(collection(db, "hotelList", "Tlemcen", "hotels"), "renaissance13@gmail.com");
 
         // Get the reservations data for the hotel
         const snapshot = await getDoc(hotelRef) ;

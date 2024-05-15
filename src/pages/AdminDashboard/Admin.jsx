@@ -265,10 +265,10 @@ function Admin({ chartData }) {
                   </div>
 
                   {/* Hotel Revenue */}
-                  <div className="w-full">
+                  {/* <div className="w-full">
                       <h3 className="text-center text-black font-bold text-2xl">Hotel Revenue </h3>
                      { hotelRevenue && <Bar style={{width: "90%", height:'500px'}} data={hotelRevenue}/>}
-                  </div>
+                  </div> */}
                 </div>
             </div>
         </div>
