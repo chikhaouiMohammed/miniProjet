@@ -21,6 +21,8 @@ function FrontDesk() {
     facebookLink: '',
     instagramLink: '',
     xLink: '',
+    abouy:'',
+    policy:''
   });
 
   const [hotelImages, setHotelImages] = useState([]);
@@ -110,16 +112,21 @@ const handleImageChange = async (e) => {
     }
   }
 };
- 
- const updateHotelData = async () => {
+
+const updateHotelData = async () => {
   try {
     const hotelRef = doc(db, 'hotelList', 'Tlemcen', 'hotels', email);
-    await setDoc(hotelRef, hotelInfo, { merge: true }); // Merge the new data with existing data instead of overwriting
+    await setDoc(hotelRef, {
+      ...hotelInfo,
+      About: document.getElementById('aboutTextarea').value, // Get the value of the about textarea
+      Policy: document.getElementById('policyTextarea').value // Get the value of the policy textarea
+    }, { merge: true }); // Merge the new data with existing data instead of overwriting
     console.log('Hotel data updated successfully!');
   } catch (error) {
     console.error('Error updating hotel data:', error);
   }
 };
+
   return (
     <div className="font-poppins w-full p-10">
       <div className='w-full p-5'>
@@ -289,11 +296,11 @@ const handleImageChange = async (e) => {
               {/* About */}
               <div>
                 <h3 className='text-2xl font-semibold mb-5'>About</h3>
-                <textarea className="textarea textarea-success w-full" placeholder="Write some words about your hotel"></textarea>
+                <textarea id="aboutTextarea" className="textarea textarea-success w-full" placeholder="Write some words about your hotel" value={hotelInfo.About} ></textarea>
               </div>
               <div>
                 <h3 className='text-2xl font-semibold mb-5'>Policy</h3>
-                <textarea className="textarea textarea-success w-full" placeholder="Write some words about your hotel"></textarea>
+                <textarea id="policyTextarea" className="textarea textarea-success w-full" placeholder="Write some words about your hotel" value={hotelInfo.Policy}></textarea>
               </div>
             </div>
         </div>

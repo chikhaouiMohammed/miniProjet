@@ -4,6 +4,7 @@ import greeceImg from '../../images/Home/Destinations/greece.png'
 import decoreBg from '../../images/Home/Destinations/Decore.png'
 import NearMeIcon from '@mui/icons-material/NearMe';
 import './destinations.css'
+import { motion } from 'framer-motion';
 
 function Destinations() {
     const cardBg = (url) => {
@@ -18,7 +19,7 @@ function Destinations() {
       
 
   return (
-    <section className="container mx-auto px-[40px] pb-[180px] font-poppins relative"> 
+    <section id='des' className="container mx-auto px-[40px] pb-[180px] font-poppins relative"> 
       {/* Heading */}
       <div className='w-fit mx-auto flex justify-center items-center flex-col mb-[60px]'>
         <h3 className='uppercase text-[#5E6282] text-base font-semibold'>Top Places</h3>
@@ -27,7 +28,7 @@ function Destinations() {
       {/* Top 3 Destinations */}
       <div className='flex justify-between items-center gap-5'>
         {/* card */}
-        <div className='w-[315px] h-[457px] rounded-2xl overflow-hidden relative card-shadow cursor-pointer' > 
+        <motion.div initial={{opacity: 0}} whileInView={{opacity:1}} transition={{duration:'1'}}  className='w-[315px] h-[457px] rounded-2xl overflow-hidden relative card-shadow cursor-pointer' > 
           {/* img */}
           <div className='w-full h-full bg-red-600' style={cardBg(romeImg)}></div>
           {/* info */}
@@ -41,9 +42,9 @@ function Destinations() {
                 <div>10 Days Trip</div>
             </div>
           </div>
-        </div>
+        </motion.div>
         {/* card */}
-        <div className='w-[315px] h-[457px] rounded-2xl overflow-hidden relative card-shadow cursor-pointer' > 
+        <motion.div initial={{opacity: 0}} whileInView={{opacity:1}} transition={{duration:'1', delay:'0.5'}}  className='w-[315px] h-[457px] rounded-2xl overflow-hidden relative card-shadow cursor-pointer' > 
           {/* img */}
           <div className='w-full h-full bg-red-600' style={cardBg(londonImg)}></div>
           {/* info */}
@@ -57,9 +58,9 @@ function Destinations() {
                 <div>10 Days Trip</div>
             </div>
           </div>
-        </div>
+        </motion.div>
         {/* card */}
-        <div className='w-[315px] h-[457px] rounded-2xl overflow-hidden relative card-shadow cursor-pointer' > 
+        <motion.div initial={{opacity: 0}} whileInView={{opacity:1}} transition={{duration:'1', delay:'1'}} className='w-[315px] h-[457px] rounded-2xl overflow-hidden relative card-shadow cursor-pointer' > 
           {/* img */}
           <div className='w-full h-full bg-red-600' style={cardBg(greeceImg)}></div>
           {/* info */}
@@ -73,7 +74,7 @@ function Destinations() {
                 <div>10 Days Trip</div>
             </div>
           </div>
-        </div>
+        </motion.div>
         
       </div>
       {/* Decore img */}

@@ -4,7 +4,7 @@ import ContactEmergencyOutlinedIcon from '@mui/icons-material/ContactEmergencyOu
 import LocalPhoneOutlinedIcon from '@mui/icons-material/LocalPhoneOutlined';
 import FmdGoodOutlinedIcon from '@mui/icons-material/FmdGoodOutlined';
 import './admin.css'
-import { Bar, Line  } from "react-chartjs-2";
+import { Line  } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
 
 ChartJS.register(
@@ -18,42 +18,38 @@ ChartJS.register(
 )
 
 import { db } from "../../Data/Firebase";
-import { collection, doc, getDoc } from 'firebase/firestore';
+import { collection, doc, getDocs,getDoc } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 import { Menu,MenuItem, IconButton } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { AuthContext } from "../../context/AuthContext";
-import { updateTopCountry } from "./Data/TopContries";
-import { updateHotelRevenue } from "./Data/HotelRevenue";
+import { getVisitorsPerMonth } from "./Data/HotelVisitors";
+import TopCountries from "./Data/TopCountries";
+import HotelRevenue from "./Data/HotelRevenue";
 
 
 
 
+function Admin() {
+  
+const [visitorsPerMonth, setVisitorsPerMonth] = useState(null);
 
-
-function Admin({ chartData }) {
-    const [arrowStatus, setArrowStatus] = useState(false);
-    const [language, setLanguage] = useState('EN');
+const fetchVisitorsPerMonth = async () => {
+  const data = await getVisitorsPerMonth();
+  setVisitorsPerMonth(data);
+};
     
-    const handleLanguageChange = (value) => {
-        setLanguage(value);
-    };
-    const [TopCountry, setTopCountry] = useState(null);
-    const [hotelRevenue, setHotelRevenue] = useState(null); 
+   
 
-    useEffect(() => {
-      const fetchTopCountry = async () => {
-          const data = await updateTopCountry();
-          setTopCountry(data);
-      };
-      fetchTopCountry();
-
-      const fetchHotelRevenue = async () => {
-          const revenueData = await updateHotelRevenue();
-          setHotelRevenue(revenueData);
-      };
-      fetchHotelRevenue();
+   useEffect(() => {
+    fetchVisitorsPerMonth();    
+    fetchHotels(); 
+    
   }, []);
+  
+
+
+  
     const options = {
         plugins: {
           legend: false
@@ -66,12 +62,15 @@ function Admin({ chartData }) {
                 }
             },
           x: {
+            
             grid: {
               display: false
             }
           }
         }
       };
+
+
   const { currentUser } = useContext(AuthContext);
   const email = currentUser ? currentUser.email : '';
   console.log(email)
@@ -110,8 +109,27 @@ function Admin({ chartData }) {
         const handleClose = () => {
           setAnchorEl(null);
         };
-      
-      
+
+        const [hotels, setHotels] = useState([]);
+        const fetchHotels = async () => {
+          try {
+            const hotelsRef = collection(db, 'hotelList', 'Tlemcen', 'hotels');
+            const snapshot = await getDocs(hotelsRef);
+            const hotelsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setHotels(hotelsData);
+          } catch (error) {
+            console.error('Error fetching hotels:', error);
+          }
+        };
+        const [activeHotel, setActiveHotel] = useState(null);
+
+  const handleHotelClick = (hotelId) => {
+    // Set the active hotel when clicked
+    setActiveHotel(hotelId);
+    // Fetch data for the selected hotel
+    fetchHotelData(hotelId);
+  };
+  console.log(hotelEmail)
 
   return (
     <div className="font-poppins">
@@ -164,66 +182,22 @@ function Admin({ chartData }) {
                 <h2 className="text-center bg-[#cec9c96b] py-[24px] font-bold text-[26px]">Hotels</h2>
                 {/* Hotels List */}
                 <div className="p-[24px] text-xl text-[#5C5E64] font-medium">
-                    <div className="active bg-mainColor text-white py-[15px] px-4 cursor-pointer rounded-lg"
-                    onClick={() => fetchHotelData('Zianides13@gmail.com')}
-                    >
-                    LES ZIANIDES
-                    </div>
-                    <hr />
-                    <div className="px-[12px] py-[18px] hover:bg-mainColor hover:text-white duration-300 transition-all cursor-pointer rounded-lg"
-                    onClick={() => fetchHotelData('renaissance13@gmail.com') }
-                    >
-                      Renaissance Tlemcen
-                    </div>
-                    <hr />
-                    <div className="px-[12px] py-[18px] hover:bg-mainColor hover:text-white duration-300 transition-all cursor-pointer rounded-lg"  
-                    onClick={() => fetchHotelData('ibis13@gmail.com')}
-                    >
-                      ibis Tlemcen
-                    </div>
-                    <hr />
-                    <div className="px-[12px] py-[18px] hover:bg-mainColor hover:text-white duration-300 transition-all cursor-pointer rounded-lg"
-                    onClick={() => fetchHotelData('GrandBassin13@gmail.com')}
-                    >
-                      Grand Bassin
-                    </div>
-                    <hr />
+                   
+                {hotels.map(hotel => (
+              <div 
+              key={hotel.id} 
+              className={`py-[15px] px-4 cursor-pointer rounded-lg ${activeHotel === hotel.id ? 'bg-mainColor text-white' : 'bg-[#F5F5F5] text-black hover:bg-mainColor hover:text-white'}`} 
+              onClick={() => {
+                fetchHotelData(hotel.id); // First action: fetch hotel data
+                handleHotelClick(hotel.id); // Second action: set active hotel
+              }}
+            >
+              {hotel.name}
+            </div>
+            
+            ))}
                     
-                    <hr />
-                    
-                    <hr />
-                    <div className="px-[12px] py-[18px] hover:bg-mainColor hover:text-white duration-300 transition-all cursor-pointer rounded-lg"
-                    onClick={() => fetchHotelData('Relax13@gmail.com')}
-                    >
-                      Relax</div>
-                    <hr />
-                    <div className="px-[12px] py-[18px] hover:bg-mainColor hover:text-white duration-300 transition-all cursor-pointer rounded-lg"
-                    onClick={() => fetchHotelData('OrientPalace13@gmail.com')}
-                    >
-                      Orient Palace
-                      </div>
-                    <hr />
-                    <div className="px-[12px] py-[18px] hover:bg-mainColor hover:text-white duration-300 transition-all cursor-pointer rounded-lg"
-                      onClick={() => fetchHotelData('Stamboli13@gmail.com')}
-                    >
-                      Stambouli
-                    </div>
-                    <hr />
-                    <div className="px-[12px] py-[18px] hover:bg-mainColor hover:text-white duration-300 transition-all cursor-pointer rounded-lg"
-                      onClick={() => fetchHotelData('Olympic13@gmail.com')}
-                    >Olympic</div>
-                    <hr />
-                    <hr />
-                    <div className="px-[12px] py-[18px] hover:bg-mainColor hover:text-white duration-300 transition-all cursor-pointer rounded-lg"
-                      onClick={() => fetchHotelData('ElMenzahkazi13@gmail.com')}
-                    >El menzah kazi</div>
-                    <hr />
-                    <div className="px-[12px] py-[18px] hover:bg-mainColor hover:text-white duration-300 transition-all cursor-pointer rounded-lg"
-                    onClick={() => fetchHotelData('Venisia13@gmail.com')}
-                    >
-                      Venisia Hotel Tlemcen
-                    </div>
-                    <hr />
+                   
                 </div>
             </div>
             {/* Dashboard */}
@@ -254,21 +228,37 @@ function Admin({ chartData }) {
                 <h3 className="text-center text-black my-10 font-bold text-2xl">Total Visitors</h3> 
                 {/* Line Chart Dashboard */}
                 <div className="w-full my-10">
-                    <Line style={{width:"100%"}} data={chartData} options={options}/>
-                </div>
+                
+                <Line
+                    style={{width: '100%'}}
+                    data={{
+                      labels: visitorsPerMonth ? visitorsPerMonth.map(({ month }) => month) : [],
+                      datasets: [
+                        {
+                          label: "Visitors per month",
+                          data: visitorsPerMonth ? visitorsPerMonth.map(({ count }) => count) : [],
+                          fill: true,
+                        borderColor: '#1b60e0',
+                        borderWidth: 5,
+                        tension: 0.4,
+                        pointBackgroundColor: 'purple',
+                        pointBorderWidth: 5
+                        },
+                      ],
+                    }}
+                    options={options}
+                  />
+      
+</div>
                 <div className="flex justify-center items-center gap-7">
                   {/* Top Contries */}
 
-                  <div className="w-full">
-                    <h3 className="text-center text-black font-bold text-2xl">Top Countries</h3>
-                    {TopCountry && <Bar style={{ width: "90%", height: '500px' }} data={TopCountry} />}
-                  </div>
+                  {hotelEmail && <TopCountries hotelEmail={hotelEmail}/>}
 
                   {/* Hotel Revenue */}
-                  {/* <div className="w-full">
-                      <h3 className="text-center text-black font-bold text-2xl">Hotel Revenue </h3>
-                     { hotelRevenue && <Bar style={{width: "90%", height:'500px'}} data={hotelRevenue}/>}
-                  </div> */}
+    
+                   {hotelEmail && <HotelRevenue hotelEmail={hotelEmail}/>}
+
                 </div>
             </div>
         </div>

@@ -5,18 +5,18 @@ import HotelSearch from "./pages/HotelSearch/HotelSearch";
 import Payment from "./pages/Payment/Payment";
 import HotelOwner from "./pages/HotelOwner/HotelOwner";
 import Landing from './pages/Landing'
-import { hotelTotalRevenue } from "./Data/HotelOwnerData";
 import SignUp from "./pages/SingUp/SignUp";
 import SignIn from "./pages/SignIn/SignIn";
-import User from "./pages/UserAccount/User";
-import ChangePAssword from './components/ChangePassword'
-import UserInfo from './components/UserInfo'
+import User from "./pages/accountUser/User";
 import Secretaire from './pages/SecretairePage.jsx/Secretaire'
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthContext } from "./context/AuthContext";
 import NewUser from "./pages/User/NewUser";
 import { ReservationProvider } from "./context/ReservationDataContext";
 import HotelProfile from "./pages/HotelProfile/HotelProfile";
+import ChangePassword from "./pages/ChangePassword";
+import InvoicePdfFile from "./pages/InvoicePdfFile";
+import InvoicePdf from './pages/InvoicePdf'
 
 function App() {
   const [visitors, setVisitors] = useState({
@@ -55,21 +55,25 @@ function App() {
     <div>
       <BrowserRouter>
         <ReservationProvider>
-          <Routes>
-            <Route path="/" element={<Landing/>} />
-            <Route path="/login" element={<SignIn />} />
-            <Route path="/register" element={<SignUp />} />
-            <Route path="/accountUser/User" element={<User />} />
-            <Route path="/secreter/new-user" element={<NewUser/>} />
-            <Route path="/hotel-search/hotel-profile" element={<HotelProfile/>} />
+        <Routes>
+                  <Route path="/" element={<Landing/>} />
+                  <Route path="/login" element={<SignIn />} />
+                  <Route path="/login/forget-password" element={<ChangePassword />} />
 
-            <Route path="/payment" element={<RequireAuth><RequireRole requiredRole="guest"><Payment /></RequireRole></RequireAuth>} />
-            <Route path="/hotel-search" element={<RequireAuth><RequireRole requiredRole="guest"><HotelSearch /></RequireRole></RequireAuth>} />
-            <Route path="/hotel-owner" element={<RequireAuth><RequireRole requiredRole="hotel-owner"><HotelOwner /></RequireRole></RequireAuth>} />
-            <Route path="/hotel-secreter" element={<RequireAuth><RequireRole requiredRole="hotel-secreter"><Secretaire /></RequireRole></RequireAuth>} />
-            <Route path="/admin" element={<RequireAuth><RequireRole requiredRole="admin"><Admin chartData={visitors} /></RequireRole></RequireAuth>} />
-            <Route path="/admin" element={<RequireAuth><RequireRole requiredRole="admin"></RequireRole></RequireAuth>} />
+                  <Route path="/register" element={<SignUp />} />
+                  <Route path="/accountUser/User" element={<User />} />
+                  <Route path="/secreter/new-user" element={<NewUser/>} />
+                  <Route path="/hotel-search/hotel-profile" element={<HotelProfile/>} />
+                  <Route path="/payment/invoice" element={<InvoicePdf/>} />
+
+                  <Route path="/payment" element={<RequireAuth><RequireRole requiredRole="guest"><Payment /></RequireRole></RequireAuth>} />
+                  <Route path="/hotel-search" element={<RequireAuth><RequireRole requiredRole="guest"><HotelSearch /></RequireRole></RequireAuth>} />
+                  <Route path="/hotel-owner" element={<RequireAuth><RequireRole requiredRole="hotel-owner"><HotelOwner /></RequireRole></RequireAuth>} />
+                  <Route path="/hotel-secreter" element={<RequireAuth><RequireRole requiredRole="hotel-secreter"><Secretaire /></RequireRole></RequireAuth>} />
+                  <Route path="/admin" element={<RequireAuth><RequireRole requiredRole="admin"><Admin chartData={visitors} /></RequireRole></RequireAuth>} />
+                  <Route path="/admin" element={<RequireAuth><RequireRole requiredRole="admin"></RequireRole></RequireAuth>} />
           </Routes>
+          
         </ReservationProvider>
       </BrowserRouter>
     </div>

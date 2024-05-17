@@ -9,7 +9,7 @@ import { db } from "../../Data/Firebase";
 import { collection, doc, getDoc, getDocs, query, where ,updateDoc} from 'firebase/firestore';
 import { AuthContext } from "../../context/AuthContext";
 import { useContext, useEffect,useState } from "react";
-
+import { ref, uploadBytes, getDownloadURL, getStorage } from "firebase/storage";
 
 
 
@@ -20,59 +20,7 @@ import { useContext, useEffect,useState } from "react";
     const email = currentUser ? currentUser.email : '';
     console.log(email)
   
-    const [UserInfo, setUserInfo] = useState({
-      FirstName: '',
-      LasetName: '',
-      Email: '',
-      Password: '',
-    });
-  
-    useEffect(() => {
-      const fetchUserData = async () => {
-        try {
-          if (!email) {
-           console.log("no user login") // No user logged in, handle accordingly
-            return;
-          }
-  
-          const guestUsersRef = collection(db, 'guestUsers');
-          const guestUserQuery = query(guestUsersRef, where('email', '==', email));
-  
-          const hotelUsersRef = collection(db, 'hotelUsers');
-          const hotelUserQuery = query(hotelUsersRef, where('email', '==', email));
 
-          const adminRef = collection(db, 'Admin');
-          const adminQuery = query(adminRef, where('email', '==', email));
-  
-          const guestUserSnapshot = await getDocs(guestUserQuery);
-          if (guestUserSnapshot.size === 1) {
-            // User is a guest
-            setUserInfo(guestUserSnapshot.docs[0].data());
-            return;
-          }
-  
-          const hotelUserSnapshot = await getDocs(hotelUserQuery);
-          if (hotelUserSnapshot.size === 1) {
-            // User is a hotel owner or secretary
-            setUserInfo(hotelUserSnapshot.docs[0].data());
-            return;
-          }
-          const adminSnapshot = await getDocs(adminQuery)
-          if(adminSnapshot.size === 1){
-            // user is a Admin
-            setUserInfo(adminSnapshot.docs[0].data());
-            return;
-          }
-  
-          // No user found in the above collections
-          console.log('User not found in guestUsers or hotelUsers ot Admin collection');
-        } catch (error) {
-          console.error('Error fetching user data:', error);
-        }
-      };
-  
-      fetchUserData();
-    }, [email]);
 
 const handleUpdate = async (e) => {
   e.preventDefault();
@@ -114,18 +62,160 @@ const handleUpdate = async (e) => {
 };
 
 
+const storage = getStorage();
+
+
+const handleImageChange = async (e) => {
+  const file = e.target.files[0];
+
+  try {
+    if (!file) {
+      console.error('No file selected.');
+      return;
+    }
+
+    if (!email) {
+      console.error('No user logged in.');
+      return;
+    }
+
+    const guestUsersRef = collection(db, 'guestUsers');
+    const guestUserQuery = query(guestUsersRef, where('email', '==', email));
+
+    const hotelUsersRef = collection(db, 'hotelUsers');
+    const hotelUserQuery = query(hotelUsersRef, where('email', '==', email));
+
+    const adminRef = collection(db, 'Admin');
+    const adminQuery = query(adminRef, where('email', '==', email));
+
+    let userSnapshot;
+
+    // Check if user exists in guestUsers collection
+    userSnapshot = await getDocs(guestUserQuery);
+    if (userSnapshot.size === 1) {
+      // User found in guestUsers collection
+      const storageRef = ref(storage, `profile_images/${email}/${file.name}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+
+      // Update the image field in the document
+      await updateDoc(userSnapshot.docs[0].ref, { image: downloadURL });
+
+      return;
+    }
+
+    // Check if user exists in hotelUsers collection
+    userSnapshot = await getDocs(hotelUserQuery);
+    if (userSnapshot.size === 1) {
+      const storageRef = ref(storage, `profile_images/${email}/${file.name}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+    // Update the image field in the document
+    await updateDoc(userSnapshot.docs[0].ref, { image: downloadURL });
+    }
+
+    // Check if user exists in Admin collection
+    userSnapshot = await getDocs(adminQuery);
+    if (userSnapshot.size === 1) {
+      
+      const storageRef = ref(storage, `profile_images/${email}/${file.name}`);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      // Update the image field in the document
+      await updateDoc(userSnapshot.docs[0].ref, { image: downloadURL });
+    }
+
+    console.log('Image uploaded successfully.');
+  } catch (error) {
+    console.error('Error uploading image:', error);
+  }
+};
+
+
+
+const [UserInfo, setUserInfo] = useState({
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: '',
+  profileImageUrl: '', // New field for storing profile image URL
+});
+const [userCollection, setUserCollection] = useState(null); // State for storing user collection reference
+
+useEffect(() => {
+  const fetchUserData = async () => {
+    try {
+      if (!email) {
+        console.log("No user login");
+        return;
+      }
+
+      const guestUsersRef = collection(db, 'guestUsers');
+      const guestUserQuery = query(guestUsersRef, where('email', '==', email));
+
+      const hotelUsersRef = collection(db, 'hotelUsers');
+      const hotelUserQuery = query(hotelUsersRef, where('email', '==', email));
+
+      const adminRef = collection(db, 'Admin');
+      const adminQuery = query(adminRef, where('email', '==', email));
+
+      let userSnapshot;
+
+      // Check if user exists in guestUsers collection
+      userSnapshot = await getDocs(guestUserQuery);
+      if (userSnapshot.size === 1) {
+        // User found in guestUsers collection
+        const userData = userSnapshot.docs[0].data();
+        setUserInfo({ ...userData, profileImageUrl: userData.image });
+        setUserCollection(guestUsersRef); // Set user collection reference
+        return;
+      }
+
+      // Check if user exists in hotelUsers collection
+      userSnapshot = await getDocs(hotelUserQuery);
+      if (userSnapshot.size === 1) {
+        // User found in hotelUsers collection
+        const userData = userSnapshot.docs[0].data();
+        setUserInfo({ ...userData, profileImageUrl: userData.image });
+        setUserCollection(hotelUsersRef); // Set user collection reference
+        return;
+      }
+
+      // Check if user exists in Admin collection
+      userSnapshot = await getDocs(adminQuery);
+      if (userSnapshot.size === 1) {
+        // User found in Admin collection
+        const userData = userSnapshot.docs[0].data();
+        setUserInfo({ ...userData, profileImageUrl: userData.image });
+        setUserCollection(adminRef); // Set user collection reference
+        return;
+      }
+
+      console.log('User not found in any collection');
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+  };
+  fetchUserData();
+}, [email]);
+
+
+
+
+
+
 
     return (
       <div className="user font-poppins">
-       
+
         <div className="userContainer">
           <div className="userShow">
             <div className="userShowTop">
-              <img
-                src="https://images.pexels.com/photos/1152994/pexels-photo-1152994.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500"
-                alt=""
-                className=" w-12 h-12 rounded-full object-cover"
-              />
+            <img
+            src={UserInfo.image || "https://via.placeholder.com/150"}
+            alt=""
+            className="w-12 h-12 rounded-full object-cover"
+          />
               <div className="userShowTopTitle">
                 <span className="userShowUsername font-semibold text-xl">{UserInfo.firstName}</span>
                 <span className="userShowUserTitle font-normal ">{UserInfo.lastName}</span>
@@ -152,7 +242,7 @@ const handleUpdate = async (e) => {
               </div>
               <div className="userShowInfo">
                 <LocationSearchingIcon className="userShowIcon" />
-                <span className="userShowInfoTitle">New York | USA</span>
+                <span className="userShowInfoTitle">Algeria | Tlemcen</span>
               </div>
             </div>
           </div>
@@ -170,29 +260,21 @@ const handleUpdate = async (e) => {
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 opacity-70"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" /></svg>
   <input type="text" className="grow" placeholder="" value={UserInfo.lastName} onChange={(e) => setUserInfo({ ...UserInfo, lastName: e.target.value })}   />
 </label>
-<label className="input input-bordered flex items-center gap-2">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 opacity-70"><path d="M2.5 3A1.5 1.5 0 0 0 1 4.5v.793c.026.009.051.02.076.032L7.674 8.51c.206.1.446.1.652 0l6.598-3.185A.755.755 0 0 1 15 5.293V4.5A1.5 1.5 0 0 0 13.5 3h-11Z" /><path d="M15 6.954 8.978 9.86a2.25 2.25 0 0 1-1.956 0L1 6.954V11.5A1.5 1.5 0 0 0 2.5 13h11a1.5 1.5 0 0 0 1.5-1.5V6.954Z" /></svg>
-  <input type="text" className="grow" placeholder="" value={UserInfo.email} onChange={(e) => setUserInfo({ ...UserInfo, email: e.target.value })}  />
-</label>
-<label className="input input-bordered flex items-center gap-2">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" className="w-4 h-4 opacity-70"><path fillRule="evenodd" d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z" clipRule="evenodd" /></svg>
-  <input type="password" className="grow" value={UserInfo.password} onChange={(e) => setUserInfo({ ...UserInfo, password: e.target.value })}  />
-</label>
-               
+
               </div>
               <div className="userUpdateRight">
                 <div className="userUpdateUpload">
-                  <img
-                    className="userUpdateImg"
-                    src="https://images.pexels.com/photos/1152994/pexels-photo-1152994.jpeg?auto=compress&cs=tinysrgb&dpr=2&w=500"
-                    alt=""
-                  />
+                <img
+                      className="userUpdateImg"
+                      src={UserInfo.image || "https://via.placeholder.com/150"}
+                      alt=""
+                    />
                   <label htmlFor="file">
                     <PublishIcon className="userUpdateIcon" />
                   </label>
-                  <input type="file" id="file" style={{ display: "none" }} />
+                  <input type="file" id="file" style={{ display: "none" }} onChange={handleImageChange}   />
                 </div>
-                <button type="submit" className="userUpdateButton bg-mainColor">Update</button>
+                <button type="submit" className="userUpdateButton bg-mainColor mt-10">Update</button>
               </div>
             </form>
           </div>

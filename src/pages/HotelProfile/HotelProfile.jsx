@@ -10,32 +10,37 @@ import { FaXTwitter } from 'react-icons/fa6';
 import { AuthContext } from '../../context/AuthContext';
 
 const HotelProfile = () => {
-  const { currentUser } = useContext(AuthContext)
-  const userEmail = currentUser.email
+  const { currentUser } = useContext(AuthContext);
+  const userEmail = currentUser.email;
   const { dispatch } = useContext(AuthContext);
-  let { state } = useLocation()
-  const hotelEmail = state.email  
+  let { state } = useLocation();
+  const hotelEmail = state.email;
   const [hotelData, setHotelData] = useState({});
   const [IsArabic, setIsArabic] = useState(false);
   const [IsEnglish, setIsEnglish] = useState(true);
   const [IsFrench, setIsFrench] = useState(false);
   const [IsEspanol, setIsEspanol] = useState(false);
-  const [roomCounts, setRoomCounts] = useState({}); // State variable for room counts
-  const [totalPrice, setTotalPrice] = useState(0); // State variable for total price
+  const [roomCounts, setRoomCounts] = useState({});
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [rooms, setRooms] = useState([]);
+  const [hotelImages, setHotelImages] = useState({});
+  const hotelName = hotelData.name
+
+  console.log(hotelImages)
 
   // Increment room count
   const incrementRoomCount = (roomName) => {
-    setRoomCounts(prevCounts => ({
+    setRoomCounts((prevCounts) => ({
       ...prevCounts,
-      [roomName]: (prevCounts[roomName] || 0) + 1
+      [roomName]: (prevCounts[roomName] || 0) + 1,
     }));
   };
 
   // Decrement room count
   const decrementRoomCount = (roomName) => {
-    setRoomCounts(prevCounts => ({
+    setRoomCounts((prevCounts) => ({
       ...prevCounts,
-      [roomName]: Math.max((prevCounts[roomName] || 0) - 1, 0)
+      [roomName]: Math.max((prevCounts[roomName] || 0) - 1, 0),
     }));
   };
 
@@ -43,13 +48,30 @@ const HotelProfile = () => {
   useEffect(() => {
     const totalPrice = calculateTotalPrice();
     setTotalPrice(totalPrice);
+    updateSelectedRooms();
   }, [roomCounts, hotelData]);
+
+
+  const updateSelectedRooms = () => {
+    if (typeof hotelData.roomType === 'object' && Object.keys(hotelData.roomType).length > 0) {
+      const selectedRooms = Object.keys(roomCounts)
+        .filter((roomName) => roomCounts[roomName] > 0)
+        .map((roomName) => ({
+          name: roomName,
+          price: hotelData.roomType[roomName].price,
+          count: roomCounts[roomName],
+        }));
+      setRooms(selectedRooms);
+    }
+  };
+  
+  
 
   const calculateTotalPrice = () => {
     let totalPrice = 0;
     // Check if hotelData.roomType is an object
     if (typeof hotelData.roomType === 'object' && Object.keys(hotelData.roomType).length > 0) {
-      Object.keys(roomCounts).forEach(roomName => {
+      Object.keys(roomCounts).forEach((roomName) => {
         const roomCount = roomCounts[roomName];
         const room = hotelData.roomType[roomName]; // Access room directly using roomName
         if (room) {
@@ -59,19 +81,28 @@ const HotelProfile = () => {
     }
     return totalPrice;
   };
-  
 
   useEffect(() => {
     const fetchHotelData = async () => {
-      try {
-        const hotelRef = doc(db, "hotelList", "Tlemcen", "hotels", hotelEmail);
+    try {
+        const hotelRef = doc(db, 'hotelList', 'Tlemcen', 'hotels', hotelEmail);
         const hotelSnap = await getDoc(hotelRef);
-        setHotelData(hotelSnap.data());
-        dispatch({ type: "LOGIN", payload: { user: currentUser, role: "guest", email: currentUser.email } }); 
-      } catch (error) {
+        const data = hotelSnap.data();
+        setHotelData(data);
+        if (data && data.roomType) {
+            setRooms(Object.keys(data.roomType));
+        }
+        
+        // Fetch hotel images and set them in state
+        const images = data && data.HotelImages['Internal&External'] ? data.HotelImages['Internal&External'] : []; // Assuming images are stored in 'images' field
+        setHotelImages(images);
+
+        dispatch({ type: 'LOGIN', payload: { user: currentUser, role: 'guest', email: currentUser.email } });
+    } catch (error) {
         console.error('Error fetching hotel data:', error);
-      }
-    };
+    }
+};
+
 
     fetchHotelData();
   }, [hotelEmail]);
@@ -88,7 +119,7 @@ const HotelProfile = () => {
   return (
     <div className="font-poppins container mx-auto text-black">
       {/* Header */}
-      <header className='w-full px-[100px] bg-transparent py-[20px] flex justify-between items-center'>
+      <header className="w-full px-[100px] bg-transparent py-[20px] flex justify-between items-center">
         <div className="navbar bg-transparent">
           <div className="flex-1">
             <a className="btn btn-ghost text-xl">StayDz</a>
@@ -97,10 +128,16 @@ const HotelProfile = () => {
             <div className="dropdown dropdown-end">
               <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
                 <div className="w-10 rounded-full">
-                  <img alt="Tailwind CSS Navbar component" src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
+                  <img
+                    alt="Tailwind CSS Navbar component"
+                    src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
+                  />
                 </div>
               </div>
-              <ul tabIndex={0} className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+              <ul
+                tabIndex={0}
+                className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
+              >
                 <li>
                   <a className="justify-between">
                     Profile
@@ -184,12 +221,12 @@ const HotelProfile = () => {
                 }
                 {hotelData.facebook && 
                     <div>
-                    <a href={hotelData.X_Link} target="_blank"><FaFacebook style={{width:'30px', height:'30px', color:'#16243b'}} /></a>
+                    <a href={hotelData.facebook} target="_blank"><FaFacebook style={{width:'30px', height:'30px', color:'#16243b'}} /></a>
                     </div>
                 }
                 {hotelData.instagrame && 
                     <div>
-                    <a href={hotelData.X_Link} target="_blank"><FaInstagram style={{width:'30px', height:'30px', color:'#16243b'}} /></a>
+                    <a href={hotelData.instagrame} target="_blank"><FaInstagram style={{width:'30px', height:'30px', color:'#16243b'}} /></a>
                     </div>
                 }
                 
@@ -220,7 +257,8 @@ const HotelProfile = () => {
       </div>
       {/* Display total price */}
       <div className='font-semibold text-center my-5 w-full'>Total Price: {totalPrice}</div>
-      <Link to="/payment" state={{email: userEmail, price: totalPrice, hotelName:hotelData.name,  hotelEmail: hotelEmail, bool: true}} className="btn btn-primary">Buy Now</Link>
+      {totalPrice === 0 && <button className="absolute left-[45%] py-4 px-7 rounded-lg hover:bg-white hover:text-mainColor hover:border-[1px] hover:border-mainColor hover:border-solid transition-all duration-300 flex justify-center items-center w-fit bg-mainColor text-white">Buy Now</button>}
+      {totalPrice && <Link to="/payment" state={{ email: userEmail, price: totalPrice, rooms: rooms, hotelEmail: hotelEmail, bool: true, images: hotelImages, hotelName: hotelName }} className="absolute left-[45%] py-4 px-7 rounded-lg hover:bg-white hover:text-mainColor hover:border-[1px] hover:border-mainColor hover:border-solid transition-all duration-300 flex justify-center items-center w-fit bg-mainColor text-white">Buy Now</Link>}
     </div>
   );
 };

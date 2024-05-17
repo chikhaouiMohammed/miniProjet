@@ -6,7 +6,7 @@ import './services.css'
 
 function Services() {
   return (
-    <section className='container mx-auto px-[40px] py-[100px] font-poppins'>
+    <section id='services' className='container mx-auto px-[40px] py-[100px] font-poppins'>
         {/* Heading */}
         <div className='w-fit mx-auto flex justify-center items-center flex-col mb-[45px]'>
             <h3 className='uppercase text-[#5E6282] text-base font-semibold'>category</h3>

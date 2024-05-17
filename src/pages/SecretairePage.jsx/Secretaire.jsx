@@ -301,8 +301,8 @@ const Secretaire = () => {
                         {reservationUser.email}
                         <br />
                       </td>
-                      <td>{reservationUser.checkin?.toDate().toLocaleDateString()}</td>
-                      <td>{reservationUser.checkout?.toDate().toLocaleDateString()}</td>
+                      <td>{reservationUser.checkInDate?.toDate().toLocaleDateString()}</td>
+                      <td>{reservationUser.checkOutDate?.toDate().toLocaleDateString()}</td>
                       <td>{reservationUser.totalPrice}</td>
                       <td>
                         <button className="btn btn-ghost btn-xs">details</button>

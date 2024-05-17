@@ -33,7 +33,6 @@ import { db } from '../../Data/Firebase';
 function Payment() {
     const { reservation } = useReservation();
     const [cardDetails, setCardDetails] = useState({});
-    const [HotelImages, setHotelImages] = useState([]);
     const [checkInDate, setCheckInDate] = useState(null);
     const [checkOutDate, setCheckOutDate] = useState(null);
     const [fullName, setfullName] = useState('');
@@ -45,8 +44,11 @@ function Payment() {
     const userEmail = state.email
     const totalPrice = state.price
     const hotelEmail = state.hotelEmail
-    const roomType = state.hotelName
+    const roomType = state.rooms
     const fromGuest = state.bool
+    const hotelImages = state.images
+    const hotelName = state.hotelName
+    
 
     const handleCheckInDateChange = (date) => {
         setCheckInDate(date);
@@ -80,6 +82,7 @@ const handleAddReservation = async () => {
                     roomType,
                     totalPrice,
                     cardDetails
+
                 };
 
                 const hotelDocRef = doc(collection(db, "hotelList", "Tlemcen", "hotels"), hotelEmail);
@@ -97,7 +100,8 @@ const handleAddReservation = async () => {
                         // If the reservation array doesn't exist yet, create a new one with the reservation
                         await setDoc(hotelDocRef, { reservation: [reservationDb] }, { merge: true });
                     }
-                    navigate('/hotel-search')
+                    
+                    navigate('/payment/invoice', {state: {hotelName: hotelName, checkInDate: checkInDate,checkOutDate : checkOutDate, rooms: roomType, fullName: fullName, phone: phone, country: country,cardDetails: cardDetails, totalPrice: totalPrice }})
                 } else {
                     console.error("Hotel document does not exist!");
                 }
@@ -141,16 +145,24 @@ return (
             {/* Hotel images & info */}
             <div className='flex justify-center items-start gap-4'>
                 {/* images */}
-                {/* <div className='flex flex-col justify-center items-start gap-8'>
-                    <div className='rounded-xl overflow-hidden w-[142px] h-[120px] cursor-pointer'>
-                    <img className='w-full h-full' src={image} alt="" />
-                    </div>
-                </div> */}
+                <div className='flex flex-col justify-center items-start gap-8'>
+                    {hotelImages.slice(0, 4).map((image, index) => (
+                        <div key={index} className='rounded-xl overflow-hidden w-[142px] h-[120px] cursor-pointer'>
+                            <img className='w-full h-full' src={image} alt={`Image ${index}`} />
+                        </div>
+                    ))}
+
+
+                </div>
                 {/* Info */}
                 <div className='flex flex-col items-start justify-center' >
                     {/* headingg */}
                     <div className='text-black mb-4'>
-                        <h2 className='text-2xl font-bold'>{roomType} room</h2>
+                        <h2 className='text-2xl font-bold'>
+                                    {roomType.map((roomName) => {
+                                return <span key={roomName.id}>{roomName.name} room, </span>;
+                            })}
+                         </h2>
                         <span className='text-[#565656] text-sm'>Modern Hotel at Gothenburg Central Station</span>
                     </div>
                     {/* Reviews Progress */}
@@ -243,15 +255,6 @@ return (
                     <div className='flex flex-col items-start ml-[-160px]'>
                         <div className='mt-10 text-2xl font-bold '><h2>Payment information</h2></div>
                         
-                        <div className='mt-8 text-xl font-bold'><h3>Your Price Summary</h3></div>
-                        <div className='flex justify-between space-x-[190px] mt-8'>
-                        <h4 className='text-base font-bold'>original price</h4>
-                        <span className='text-base font-bold'>$960 &nbsp; <span className='text-base font-bold text-[#565656]'>4 night</span> </span>
-                        </div>
-                        <div className='flex justify-between space-x-[100px] mt-8'>
-                        <h4 className='text-sm font-normal'>EasySet24 Loyalty Discount 4 %</h4>
-                        <span className='text-sm font-normal text-mainColor'>$100 <span className='text-sm font-normal text-[#565656]'>Discount</span> </span>
-                        </div>
                         <div className='flex justify-between space-x-[100px] mt-8'>
                         <h4 className='text-base font-semibold'>Total Amount for Payment</h4>
                         <span className='text-2xl font-bold text-mainColor'>{totalPrice} DZD </span>
@@ -315,14 +318,6 @@ return (
         </div>
         {/* right side */}
         <div className='flex flex-col justify-center items-center  '>
-            <div className='flex justify-between gap-8'>
-            <div className='flex justify-center items-center gap-4'>
-                                
-            </div>
-            <div className='w-full h-full bg-white rounded border border-mainColor flex justify-center items-center '>
-            <h3 className='text-mainColor text-base font-medium capitalize leading-snug pt-4 pb-4 pl-4 pr-4'> Check Your Booking Story</h3>
-            </div>
-            </div>
             <div  className='flex justify-between gap-4 mt-8'>
                     <h4 className='font-bold text-base'>Who are you booking for?</h4>
                     <div className='flex justify-between items-center gap-1'>
@@ -409,7 +404,7 @@ return (
                     <h3 className='font-semibold text-base mb-3'>You Arrival time</h3>
                     <div className='flex items-center'>
                         <CheckCircleOutlineRoundedIcon/>
-                        <span className='font-medium text-sm pl-2'>your rooms will be ready for check_in between 15:00 and 23:00</span>
+                        <span className='font-medium text-sm pl-2'>your rooms will be ready for check_in </span>
                     </div>
                     <div>
                         <AccessTimeRoundedIcon/>

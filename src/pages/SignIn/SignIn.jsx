@@ -219,7 +219,7 @@ const SignIn = () => {
             <div className='w-full flex items-center'>
               <input type="checkbox" className='w-4 h-4 mr-2 '/>
             </div>
-            <p className='text-sm  whitespace-nowrap cursor-pointer'>Forget Password ?</p>
+            <Link to="/login/forget-password" state={{email: email}} className='text-sm  whitespace-nowrap cursor-pointer text-blue-900 transition-all duration-300 hover:text-black'>Forget Password ?</Link>
           </div>
           <div className='w-full flex flex-col mt-8 pt-8'>
             <button className='w-full my-2 bg-mainColor rounded-3xl shadow p-4 text-center text-white flex items-center justify-center font-medium' onClick={handleSignIn}>Login</button>

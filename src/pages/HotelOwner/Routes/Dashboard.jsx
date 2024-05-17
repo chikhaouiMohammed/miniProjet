@@ -95,11 +95,16 @@ function Dashboard() {
 
 
 
-
+/*
   const [doublePrice, setDoublePrice] = useState(null);
   const [familyPrice, setFamilyPrice] = useState(null);
   const [standardPrice, setStandardPrice] = useState(null);
   const [suitePrice, setSuitePrice] = useState(null);
+
+  const [doubleTotal, setDoubleTotal] = useState(null);
+  const [familyTotal, setFamilyTotal] = useState(null);
+  const [standardTotal, setStandardTotal] = useState(null);
+  const [suiteTotal, setSuiteTotal] = useState(null);
 
   useEffect(() => {
     const fetchPriceRoomData = async () => {
@@ -113,6 +118,13 @@ function Dashboard() {
           setFamilyPrice(priceroomData.familly?.price);
           setStandardPrice(priceroomData.standard?.price);
           setSuitePrice(priceroomData.suite?.price);
+
+          const totalRooms = hotelDoc.data().roomType;
+          setDoubleTotal(totalRooms.double?.total_rooms);
+          setFamilyTotal(totalRooms.familly?.total_rooms);
+          setStandardTotal(totalRooms.standard?.total_rooms);
+          setSuiteTotal(totalRooms.suite?.total_rooms);
+
         } else {
           console.log('Document does not exist');
         }
@@ -124,7 +136,7 @@ if(email){
     fetchPriceRoomData();
 }
   }, [email]);
-
+*/
   const [totalRooms, setTotalRooms] = useState(0);
   
       useEffect(() => {
@@ -178,14 +190,66 @@ if(email){
   
 
   
+/*
+  const [roomTypes, setRoomTypes] = useState([]);
+
+  useEffect(() => {
+    const fetchRoomTypes = async () => {
+      try {
+        const hotelRef = doc(db, 'hotelList', 'Tlemcen', 'hotels', email );
+        const hotelDoc = await getDoc(hotelRef);
+
+        if (hotelDoc.exists()) {
+          const roomTypesData = hotelDoc.data().roomType;
+          setRoomTypes(Object.values(roomTypesData));
+        } else {
+          console.log("Hotel document not found for the current user");
+        }
+      } catch (error) {
+        console.error('Error fetching room types:', error);
+      }
+    };
+
+    if (email) {
+      fetchRoomTypes();
+    }
+  }, [email]);
 
 
 
+*/
+
+const [roomTypes, setRoomTypes] = useState([]);
 
 
 
+useEffect(() => {
+  const fetchRoomTypes = async () => {
+    try {
+      const hotelRef = doc(db, 'hotelList', 'Tlemcen', 'hotels', email);
+      const hotelDoc = await getDoc(hotelRef);
 
+      if (hotelDoc.exists()) {
+        const roomTypeData = hotelDoc.data().roomType;
+        const roomTypesArray = [];
+        for (const roomTypeName in roomTypeData) {
+          const roomType = roomTypeData[roomTypeName];
+         
+          roomTypesArray.push({
+            name: roomTypeName,
+            price: roomType.price,
+            TotalRoom:roomType.total_rooms
+          });
+        }
+        setRoomTypes(roomTypesArray);
+      }
+    } catch (error) {
+      console.error('Error fetching room types:', error);
+    }
+  };
 
+  fetchRoomTypes();
+}, [email]);
 
 
 
@@ -254,35 +318,16 @@ if(email){
             {/* Rooms */}
             <div className='bg-white rounded-xl px-10 py-4 mt-12'>
               <h2 className='text-3xl font-semibold mb-10'>Rooms</h2>
-              <div className='flex justify-between items-center'>
-                {/* Single Sharing */}
-                <div className="card w-fit bg-base-100 shadow-xl px-16 py-7">
-                  <span className='bg-green-500 text-green-800 w-fit px-2 rounded-lg'>2 Deals</span>
-                    <h2 className="card-title mt-3 mb-2">double</h2>
-                    <span className='text-xl font-medium text-gray-700'><span className='text-2xl font-semibold'>2</span>/30</span>
-                    <div className='text-base font-medium'><span className='text-mainColor font-bold text-3xl mt-3'>{doublePrice}</span>/day</div>
-                </div>
-                {/* Single Sharing */}
-                <div className="card w-fit bg-base-100 shadow-xl px-16 py-7">
-                  <span className='bg-green-500 text-green-800 w-fit px-2 rounded-lg'>2 Deals</span>
-                    <h2 className="card-title mt-3 mb-2">familly</h2>
-                    <span className='text-xl font-medium text-gray-700'><span className='text-2xl font-semibold'>2</span>/30</span>
-                    <div className='text-base font-medium'><span className='text-mainColor font-bold text-3xl mt-3'>{familyPrice}</span>/day</div>
-                </div>
-                {/* Single Sharing */}
-                <div className="card w-fit bg-base-100 shadow-xl px-20 py-7">
-                  <span className='bg-green-500 text-green-800 w-fit px-2 rounded-lg'>2 Deals</span>
-                    <h2 className="card-title mt-3 mb-2">standard</h2>
-                    <span className='text-xl font-medium text-gray-700'><span className='text-2xl font-semibold'>2</span>/30</span>
-                    <div className='text-base font-medium'><span className='text-mainColor font-bold text-3xl mt-3'>{standardPrice}</span>/day</div>
-                </div>
-                {/* Single Sharing */}
-                <div className="card w-fit bg-base-100 shadow-xl px-16 py-7">
-                  <span className='bg-green-500 text-green-800 w-fit px-2 rounded-lg'>2 Deals</span>
-                    <h2 className="card-title mt-3 mb-2">suite</h2>
-                    <span className='text-xl font-medium text-gray-700'><span className='text-2xl font-semibold'>2</span>/30</span>
-                    <div className='text-base font-medium'><span className='text-mainColor font-bold text-3xl mt-3'>{suitePrice}</span>/day</div>
-                </div>
+              <div className='flex space-x-32 items-center'>
+              {roomTypes.map(roomType => (
+            <div key={roomType.name} className="bg-white rounded-lg shadow-md overflow-hidden transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+              <span className='bg-green-500 text-green-800 w-fit px-2 rounded-lg'>2 Deals</span>
+              <h2 className="card-title mt-3 mb-2">{roomType.name}</h2>
+              <span className='text-xl font-medium text-gray-700'><span className='text-2xl font-semibold'>{roomType.TotalRoom}</span>/{totalRooms}</span>
+              <div className='text-base font-medium'><span className='text-mainColor font-bold text-3xl mt-3'>{roomType.price}</span>/day</div>
+            </div>
+          ))}
+                
               </div>
             </div>
             {/* Total Revenue */}

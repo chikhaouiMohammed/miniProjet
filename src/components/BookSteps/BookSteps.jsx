@@ -8,6 +8,8 @@ import firstIcon from '../../images/Home/BookSteps/card/icons/send 2.png'
 import secondIcon from '../../images/Home/BookSteps/card/icons/LEAF.png'
 import thirdIcon from '../../images/Home/BookSteps/card/icons/map 1.png'
 import fourthIcon from '../../images/Home/BookSteps/card/icons/Group.png'
+import { motion } from 'framer-motion'
+
 
 function BookSteps() {
   return (
@@ -16,14 +18,14 @@ function BookSteps() {
             {/* Info */}
             <div className="flex flex-col justify-center items-start">
                 {/* Heading */}
-                <div className=' mb-10'>
+                <motion.div initial={{x:-100}} whileInView={{x:0}} transition={{duration:'0.5'}} className=' mb-10'>
                     <h4 className="text-[#5E6282] text-base font-semibold">Easy and Fast</h4>
                     <h2 className="text-[50px] text-[#14183E] font-volkhov font-bold">Book your next trip <br /> in 3 easy steps</h2>
-                </div>
+                </motion.div>
                 {/* Steps */}
                 <div className="flex flex-col justify-center items-start gap-[60px] text-base text-[#5E6282]">
                     {/* choose destination */}
-                    <div className="flex justify-center items-center gap-3">
+                    <motion.div initial={{opacity: 0}} whileInView={{opacity:1}} transition={{duration:'1'}} className="flex justify-center items-center gap-3">
                         {/* icon */}
                         <div className='w-[50px] h-[50px]'><img className='w-full h-full' src={destinationImg} alt="" /></div>
                         {/* info */}
@@ -31,9 +33,9 @@ function BookSteps() {
                             <h4 className="font-bold">Choose Destination</h4>
                             <span className="font-medium">Chose anny hotel in anny city you like.</span>
                         </div>
-                    </div>
+                    </motion.div>
                     {/* make payment */}
-                    <div className="flex justify-center items-center gap-3">
+                    <motion.div initial={{opacity: 0}} whileInView={{opacity:1}} transition={{delay:'1.1',duration:'1'}} className="flex justify-center items-center gap-3">
                         {/* icon */}
                         <div className='w-[50px] h-[50px]'><img className='w-full h-full' src={paymentImg} alt="" /></div>
                         {/* info */}
@@ -41,9 +43,9 @@ function BookSteps() {
                             <h4 className="font-bold">Make Payment</h4>
                             <span className="font-medium">Make payment in anny methode you like.</span>
                         </div>
-                    </div>
+                    </motion.div>
                     {/* choose destination */}
-                    <div className="flex justify-center items-center gap-3">
+                    <motion.div initial={{opacity: 0}} whileInView={{opacity:1}} transition={{delay:'2.1',duration:'1'}} className="flex justify-center items-center gap-3">
                         {/* icon */}
                         <div className='w-[50px] h-[50px]'><img className='w-full h-full' src={dateImg} alt="" /></div>
                         {/* info */}
@@ -51,13 +53,13 @@ function BookSteps() {
                             <h4 className="font-bold">Select the Date</h4>
                             <span className="font-medium">Chose the date even earlier and guarantee good services.</span>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </div>
             {/* Images */}
             <div className=' mr-10 relative '>
                 {/* Card */}
-                <div className='px-[25px] py-[20px] shadow-2xl rounded-2xl z-20 bg-white'>
+                <motion.div initial={{x:100}} whileInView={{x:0}} transition={{duration:'0.5'}} className='px-[25px] py-[20px] shadow-2xl rounded-2xl z-20 bg-white'>
                     {/* Image */}
                     <div><img src={tlemcenTripImg} alt="" /></div>
                     {/* info */}
@@ -74,7 +76,7 @@ function BookSteps() {
                             <span>24 hotel exist</span>
                         </div>
                     </div>
-                </div>
+                </motion.div>
                 {/* Effect Image */}
                 <div className=' absolute bottom-0 -right-[5px] -z-10'>
                     <img src={effectImg} alt="" />

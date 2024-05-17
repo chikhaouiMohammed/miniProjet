@@ -5,12 +5,14 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { useEffect, useState } from 'react';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import Checkbox from '@mui/material/Checkbox';
 import './hotelSearch.css'
-import { Box, FormControlLabel, FormGroup, Rating, Slider } from '@mui/material';
+import { Box, FormControlLabel, FormGroup , Rating, Slider } from '@mui/material';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+
+import { Menu,MenuItem, IconButton } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
 import LocationOnSharpIcon from '@mui/icons-material/LocationOnSharp';
 import SearchIcon from '@mui/icons-material/Search';
@@ -68,6 +70,15 @@ function HotelSearch() {
     const [value, setValue] = useState(2); 
     const [hover, setHover] = useState(-1);
     const theme = useTheme(); 
+    const [anchorEl, setAnchorEl] = useState(null);
+      
+        const handleClick = (event) => {
+          setAnchorEl(event.currentTarget);
+        };
+      
+        const handleClose = () => {
+          setAnchorEl(null);
+        };
 
     console.log(roomTypeFilter)
   
@@ -163,31 +174,47 @@ function HotelSearch() {
 
   return (
     <div className='font-poppins text-mainTextColor'>
-        <header className='w-full px-[100px] py-[20px] flex justify-between items-center box-shadow'>
-            <div className="navbar bg-transparent">
-                <div className="flex-1">
-                    <a className="btn btn-ghost text-xl">StayDz</a>
-                </div>
-                <div className="flex-none gap-2">
-                    <div className="dropdown dropdown-end">
-                    <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                        <div className="w-10 rounded-full">
-                        <img alt="Tailwind CSS Navbar component" src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-                        </div>
-                    </div>
-                    <ul tabIndex={0} className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-                        <li>
-                        <a className="justify-between">
-                            Profile
-                            <span className="badge">New</span>
-                        </a>
-                        </li>
-                        <li><a>Logout</a></li>
-                    </ul>
-                    </div>
-                </div>
+        <header className="w-full px-[100px] py-[20px] flex justify-between items-center mb-[74px] box-shadow">
+     {/* Logo */}
+    <div className="flex-1">
+              <a className="btn btn-ghost text-xl">StayDz</a>
             </div>
-        </header>
+
+      {/* Profile Dropdown */}
+      <div className="relative">
+        <IconButton
+          aria-label="account of current user"
+          aria-controls="menu-appbar"
+          aria-haspopup="true"
+          onClick={handleClick}
+          color="inherit"
+          size="large" // Adjust the size here
+        >
+          <AccountCircleIcon sx={{ fontSize: 38 }} /> {/* Adjust the font size here */}
+        </IconButton>
+        <Menu
+          id="menu-appbar"
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          getContentAnchorEl={null} // Ensure anchorEl doesn't affect menu positioning
+          className="mt-2"
+        >
+          <Link to="/accountUser/User">
+            <MenuItem onClick={handleClose}>Profile New</MenuItem>
+          </Link>
+          <MenuItem onClick={handleClose}>Logout</MenuItem>
+        </Menu>
+      </div>
+      </header>
         {/* Images Carousel */}
         <div className="carousel w-full">
             <div id="slide1" className="carousel-item relative w-full">
