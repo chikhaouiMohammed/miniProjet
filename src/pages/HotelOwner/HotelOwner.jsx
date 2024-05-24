@@ -116,7 +116,9 @@ function HotelOwner() {
           <Link to="/accountUser/User">
           <MenuItem onClick={handleClose}>Profile New</MenuItem>
          </Link>
-          <MenuItem onClick={handleClose}>Logout</MenuItem>
+         <Link to="/login">
+              <MenuItem onClick={handleClose}>Logout</MenuItem>
+            </Link>
         </Menu>
       </div>
     </header>

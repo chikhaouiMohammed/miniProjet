@@ -21,17 +21,15 @@ import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
 import CheckCircleOutlineRoundedIcon from '@mui/icons-material/CheckCircleOutlineRounded';
 import FavoriteBorderRoundedIcon from '@mui/icons-material/FavoriteBorderRounded';
 import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-import { useReservation } from '../../context/ReservationDataContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { collection, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../Data/Firebase';
-
-
+import { Menu,MenuItem, IconButton } from '@mui/material';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { Link } from 'react-router-dom';
 function Payment() {
-    const { reservation } = useReservation();
     const [cardDetails, setCardDetails] = useState({});
     const [checkInDate, setCheckInDate] = useState(null);
     const [checkOutDate, setCheckOutDate] = useState(null);
@@ -48,6 +46,7 @@ function Payment() {
     const fromGuest = state.bool
     const hotelImages = state.images
     const hotelName = state.hotelName
+    
     
 
     const handleCheckInDateChange = (date) => {
@@ -82,8 +81,8 @@ const handleAddReservation = async () => {
                     roomType,
                     totalPrice,
                     cardDetails
-
                 };
+                
 
                 const hotelDocRef = doc(collection(db, "hotelList", "Tlemcen", "hotels"), hotelEmail);
                 const hotelDocSnap = await getDoc(hotelDocRef);
@@ -117,26 +116,60 @@ const handleAddReservation = async () => {
         // Optionally, display an error message or take other actions
     }
 };
+const [anchorEl, setAnchorEl] = useState(null);
+      
+const handleClick = (event) => {
+  setAnchorEl(event.currentTarget);
+};
 
+const handleClose = () => {
+  setAnchorEl(null);
+};
 return (
 <div className=' container mx-auto font-poppins'>
-    <header className='py-[50px] flex justify-between items-center mb-[100px]'>
-  {/* Logo */}
-    <div className='text-xl font-bold cursor-pointer'>Logo</div>
-  {/* nav */}
-    <nav className='flex justify-center items-center gap-5'>
-    {/* User Account */}
-    <div className='flex justify-center items-center gap-4'>
-      {/* user image */}
-        <div className='w-[50px] h-[50px] overflow-hidden rounded-full cursor-pointer'><img className='w-full h-full' src={userImg} alt="" /></div>
-      {/* info */}
-        <div className='flex flex-col justify-center items-center gap-[1px] text-mainTextColor '>
-        <h4 className='font-extrabold text-[16px]'>Your Account</h4>
-        <span className='text-[14px]'>Nobody</span>
-        </div>
-    </div>
-    </nav>
-    </header>
+<header className="w-full px-[100px] py-[20px] flex justify-between items-center mb-[74px] box-shadow">
+     {/* Logo */}
+    <div className="flex-1">
+              <a className="btn btn-ghost text-xl">StayDz</a>
+            </div>
+
+      {/* Profile Dropdown */}
+      <div className="relative">
+        <IconButton
+          aria-label="account of current user"
+          aria-controls="menu-appbar"
+          aria-haspopup="true"
+          onClick={handleClick}
+          color="inherit"
+          size="large" // Adjust the size here
+        >
+          <AccountCircleIcon sx={{ fontSize: 38 }} /> {/* Adjust the font size here */}
+        </IconButton>
+        <Menu
+          id="menu-appbar"
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          getContentAnchorEl={null} // Ensure anchorEl doesn't affect menu positioning
+          className="mt-2"
+        >
+          <Link to="/accountUser/User">
+            <MenuItem onClick={handleClose}>Profile New</MenuItem>
+          </Link>
+          <Link to="/login">
+              <MenuItem onClick={handleClose}>Logout</MenuItem>
+            </Link>
+        </Menu>
+      </div>
+      </header>
 
       {/* payment page content */}
         <div className='flex justify-end gap-[20%] items-center  flex-nowrap  pb-40'>
@@ -145,18 +178,21 @@ return (
             {/* Hotel images & info */}
             <div className='flex justify-center items-start gap-4'>
                 {/* images */}
-                <div className='flex flex-col justify-center items-start gap-8'>
-                    {hotelImages.slice(0, 4).map((image, index) => (
-                        <div key={index} className='rounded-xl overflow-hidden w-[142px] h-[120px] cursor-pointer'>
-                            <img className='w-full h-full' src={image} alt={`Image ${index}`} />
-                        </div>
-                    ))}
+                
+                    <div className='flex flex-col justify-center items-start gap-8'>
+                        {hotelImages.slice(0, 4).map((image, index) => (
+                            <div key={index} className='rounded-xl overflow-hidden w-[142px] h-[120px] cursor-pointer'>
+                                <img className='w-full h-full' src={image} alt={`Image ${index}`} />
+                            </div>
+                        ))}
 
 
-                </div>
+                    </div>
+                
                 {/* Info */}
                 <div className='flex flex-col items-start justify-center' >
                     {/* headingg */}
+                    
                     <div className='text-black mb-4'>
                         <h2 className='text-2xl font-bold'>
                                     {roomType.map((roomName) => {
@@ -165,6 +201,7 @@ return (
                          </h2>
                         <span className='text-[#565656] text-sm'>Modern Hotel at Gothenburg Central Station</span>
                     </div>
+                    
                     {/* Reviews Progress */}
                     <div className='flex flex-col justify-center items-start gap-2 mb-7 '>
                         <div className='w-full flex justify-between items-center'>
@@ -342,13 +379,13 @@ return (
                 <div className='w-full flex justify-center items-start flex-col'>
                     <h3 className='font-bold text-2xl mt-8'>Full Name</h3>
                     <div className='flex items-center justify-start gap-4 mt-3 '>
-                    <input id='fullName' type="text" value={reservation?.fullName} placeholder='Full Name' onChange={(e)=>{setfullName(e.target.value)}} className=' rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' required />
+                    <input id='fullName' type="text" value={fullName} placeholder='Full Name' onChange={(e)=>{setfullName(e.target.value)}} className=' rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' required />
 
                     </div>
                     <div className='flex justify-between gap-4 mt-4'>
                         <div>
                         <h3 className='font-medium text-base'>Email Adress</h3>
-                        <input id='email' type="email" value={reservation?.email}  placeholder='your email ' onChange={(e)=>{setEmail(e.target.value)}} className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' required />
+                        <input id='email' type="email" value={email}  placeholder='your email ' onChange={(e)=>{setEmail(e.target.value)}} className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' required />
                         </div>
                         <div>
                             <h3 className='font-medium text-base'>phone number</h3>
@@ -361,7 +398,7 @@ return (
                     </div>
                     <div className='mt-4'>
                         <h4 className='font-medium text-base mb-2'>country/Region</h4>
-                        <input type="text" value={reservation?.country} id="" placeholder='your country' onChange={(e) => setcountry(e.target.value)} className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
+                        <input type="text" value={country} id="" placeholder='your country' onChange={(e) => setcountry(e.target.value)} className='  rounded-sm border border-neutral-400 text-neutral-600 text-xs font-normal pl-2 pt-2 pb-2' />
                     </div>
                     
                 </div>

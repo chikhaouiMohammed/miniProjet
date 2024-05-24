@@ -1,154 +1,138 @@
 import { useContext, useEffect, useState } from "react";
-import { addDoc, collection, doc, getDocs, where, query, updateDoc, arrayUnion, getDoc, setDoc } from "firebase/firestore"; 
+import { doc, getDoc } from "firebase/firestore"; 
 import { db } from '../../Data/Firebase'
-import { useNavigate } from "react-router-dom";
-import { DateTimePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { Box } from "@mui/material";
 import { AuthContext } from "../../context/AuthContext";
-import { useReservation } from "../../context/ReservationDataContext";
+import { Link, useLocation } from "react-router-dom";
 
 const NewUser = () => {
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [checkInDate, setCheckInDate] = useState(null);
-  const [checkOutDate, setCheckOutDate] = useState(null);
-  const [country, setCountry] = useState('');
-  const [roomType, setRoomType] = useState('');
-  const [doubleCount, setDoubleCount] = useState(0);
-  const [standardCount, setStandardCount] = useState(0);
-  const [familyCount, setFamilyCount] = useState(0);
-  const [suiteCount, setSuiteCount] = useState(0);
-  const [hotelEmail, setHotelEmail] = useState('');
   const { currentUser } = useContext(AuthContext);
-  const navigate = useNavigate();
+  const userEmail = currentUser.email;
   const { dispatch } = useContext(AuthContext);
-  const secreterEmail = currentUser ? currentUser.email : '';
-  const { setReservationData } = useReservation();
+  const { state } = useLocation()
+  const [hotelData, setHotelData] = useState({});
+  const [roomCounts, setRoomCounts] = useState({});
+  const [totalPrice, setTotalPrice] = useState(0);
+  const [rooms, setRooms] = useState([]);
+  const [hotelImages, setHotelImages] = useState({});
+  const hotelName = hotelData.name
+  const hotelEmail = state.email
 
-  console.log(secreterEmail)
+  console.log(hotelImages)
+
+  // Increment room count
+  const incrementRoomCount = (roomName) => {
+    setRoomCounts((prevCounts) => ({
+      ...prevCounts,
+      [roomName]: (prevCounts[roomName] || 0) + 1,
+    }));
+  };
+
+  // Decrement room count
+  const decrementRoomCount = (roomName) => {
+    setRoomCounts((prevCounts) => ({
+      ...prevCounts,
+      [roomName]: Math.max((prevCounts[roomName] || 0) - 1, 0),
+    }));
+  };
+
+  // Calculate total price based on room counts
+  useEffect(() => {
+    const totalPrice = calculateTotalPrice();
+    setTotalPrice(totalPrice);
+    updateSelectedRooms();
+  }, [roomCounts, hotelData]);
+
+
+  const updateSelectedRooms = () => {
+    if (typeof hotelData.roomType === 'object' && Object.keys(hotelData.roomType).length > 0) {
+      const selectedRooms = Object.keys(roomCounts)
+        .filter((roomName) => roomCounts[roomName] > 0)
+        .map((roomName) => ({
+          name: roomName,
+          price: hotelData.roomType[roomName].price,
+          count: roomCounts[roomName],
+        }));
+      setRooms(selectedRooms);
+    }
+  };
+  
+  
+
+  const calculateTotalPrice = () => {
+    let totalPrice = 0;
+    // Check if hotelData.roomType is an object
+    if (typeof hotelData.roomType === 'object' && Object.keys(hotelData.roomType).length > 0) {
+      Object.keys(roomCounts).forEach((roomName) => {
+        const roomCount = roomCounts[roomName];
+        const room = hotelData.roomType[roomName]; // Access room directly using roomName
+        if (room) {
+          totalPrice += room.price * roomCount;
+        }
+      });
+    }
+    return totalPrice;
+  };
 
   useEffect(() => {
-    const fetchHotelUserId = async () => {
-      try {
-        const hotelUsersRef = collection(db, 'hotelUsers');
-        const hotelUsersQuery = query(hotelUsersRef, where('secreter.email', '==', currentUser.email));
-        const hotelUsersSnapshot = await getDocs(hotelUsersQuery);
-        if (!hotelUsersSnapshot.empty) {
-          const hotelUserDoc = hotelUsersSnapshot.docs[0];
-          setHotelEmail(hotelUserDoc.id);
-        }
-      } catch (error) {
-        console.error("Error fetching hotel user ID:", error);
-      }
-    };
-
-    fetchHotelUserId();
-  }, [currentUser.email]);
-
-  const handleCheckInDateChange = (date) => {
-    setCheckInDate(date);
-  };
-
-  const handleCheckOutDateChange = (date) => {
-    setCheckOutDate(date);
-  };
-
-  const handleAdd = async (e) => {
-    e.preventDefault();
-    const reservation = {
-      fullName,
-      email,
-      hotelEmail,
-      checkInDate: checkInDate.$d,
-      checkOutDate: checkOutDate.$d,
-      country,
-      roomType,
-      doubleCount,
-      standardCount,
-      familyCount,
-      suiteCount
-    };
-  
+    const fetchHotelData = async () => {
     try {
-      const hotelDocRef = doc(collection(db, "hotelList", "Tlemcen", "hotels"), hotelEmail);
-      const hotelDocSnap = await getDoc(hotelDocRef);
-      if (hotelDocSnap.exists()) {
-        const hotelData = hotelDocSnap.data();
-        
-        // Check if the reservation array already exists
-        if (hotelData.reservation) {
-          // If the reservation array exists, add the new reservation to it
-          await updateDoc(hotelDocRef, {
-            reservation: [...hotelData.reservation, reservation]
-          });
-        } else {
-          // If the reservation array doesn't exist yet, create a new one with the reservation
-          await setDoc(hotelDocRef, { reservation: [reservation] }, { merge: true });
+        const hotelRef = doc(db, 'hotelList', 'Tlemcen', 'hotels', hotelEmail);
+        const hotelSnap = await getDoc(hotelRef);
+        const data = hotelSnap.data();
+        setHotelData(data);
+        if (data && data.roomType) {
+            setRooms(Object.keys(data.roomType));
         }
-        setReservationData(reservation);
-        dispatch({ type: "LOGIN", payload: { user: reservation, role: "guest", email: currentUser.email } }); 
-        navigate('/payment', { state: { reservation: reservation } });
+        
+        // Fetch hotel images and set them in state
+        const images = data && data.HotelImages['Internal&External'] ? data.HotelImages['Internal&External'] : []; // Assuming images are stored in 'images' field
+        setHotelImages(images);
 
-      } else {
-        console.error("Hotel document does not exist!");
-      }
+        dispatch({ type: 'LOGIN', payload: { user: currentUser, role: 'guest', email: currentUser.email } });
     } catch (error) {
-      console.error("Error adding reservation:", error);
+        console.error('Error fetching hotel data:', error);
     }
+};
+
+
+    fetchHotelData();
+  }, [hotelEmail]);
+
+  
+  const [anchorEl, setAnchorEl] = useState(null);
+      
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
   };
   
 
   return (
-    <div className="bg-white py-32 flex justify-center items-center w-full h-full ">
-      <form onSubmit={handleAdd} className="flex justify-center items-center gap-10 flex-col w-[400px]">
-        <label className="input input-bordered flex items-center gap-2 w-full">
-          <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-        </label>
-        <label className="input input-bordered flex items-center gap-2 w-full">
-          <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full Name" />
-        </label>
-        <div className='w-full'>
-          <Box sx={{width:'100%'}}>
-            <LocalizationProvider  dateAdapter={AdapterDayjs}>
-              <DemoContainer components={['DateTimePicker']}>
-                <DateTimePicker label="Check in date" onChange={handleCheckInDateChange} />
-              </DemoContainer>
-            </LocalizationProvider>
-          </Box>
-        </div>
-        <div className='w-full'>
-          <Box sx={{width:'100%'}}>
-            <LocalizationProvider  dateAdapter={AdapterDayjs}>
-              <DemoContainer components={['DateTimePicker']}>
-                <DateTimePicker label="Check out date" onChange={handleCheckOutDateChange} />
-              </DemoContainer>
-            </LocalizationProvider>
-          </Box>
-        </div>
-        <label className="input input-bordered flex items-center gap-2 w-full">
-          <input type="text" value={country} onChange={(e) => setCountry(e.target.value)} placeholder="Country" />
-        </label>
-        <h2 className="text-[25px] font-bold text-black">Room Selected</h2>
-        <div className="flex justify-center items-center gap-4">
-          <h3 className="font-bold text-xl">Standard</h3>
-          <div><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setStandardCount(standardCount - 1)}>-</span><span className="text-[22px]">{standardCount}</span><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setStandardCount(standardCount + 1)}>+</span></div>
-        </div>
-        <div className="flex justify-center items-center gap-4">
-          <h3 className="font-bold text-xl">Double</h3>
-          <div><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setDoubleCount(doubleCount - 1)}>-</span><span className="text-[22px]">{doubleCount}</span><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setDoubleCount(doubleCount + 1)}>+</span></div>
-        </div>
-        <div className="flex justify-center items-center gap-4">
-          <h3 className="font-bold text-xl">Family</h3>
-          <div><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setFamilyCount(familyCount - 1)}>-</span><span className="text-[22px]">{familyCount}</span><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setFamilyCount(familyCount + 1)}>+</span></div>
-        </div>
-        <div className="flex justify-center items-center gap-4">
-          <h3 className="font-bold text-xl">Suite</h3>
-          <div><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setSuiteCount(suiteCount - 1)}>-</span><span className="text-[22px]">{suiteCount}</span><span className="cursor-pointer p-5 font-semibold text-3xl" onClick={() => setSuiteCount(suiteCount + 1)}>+</span></div>
-        </div>
-        <button type="submit" className="btn btn-primary">Submit</button>
-      </form>
+    <div className="bg-white py-32 flex flex-col gap-10  justify-center items-center w-full h-full ">
+      {/* Rooms */}
+      <div className="w-full flex justify-center items-center gap-8">
+              {/* Room cards */}
+              {hotelData && hotelData.roomType && Object.values(hotelData.roomType).map((room, index) => (
+                <div key={index} className="card w-96 bg-base-100 shadow-xl">
+                  <figure className='w-[384px] h-[256px]'><img className='w-full h-full' src={room.images[0]} alt="Room" /></figure>
+                  <div className="card-body">
+                    <h2 className="card-title">{room.name}</h2>
+                    <p>Price: <span className='text-mainColor text-xl'>{room.price}</span></p>
+                    <div className="card-actions flex justify-between items-center">
+                      <button onClick={() => decrementRoomCount(room.name)} className="btn btn-outline btn-error">-</button>
+                      <span>{roomCounts[room.name] || 0}</span>
+                      <button onClick={() => incrementRoomCount(room.name)} className="btn btn-outline btn-accent">+</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Display total price */}
+            <div className='font-semibold text-center my-5 w-full'>Total Price: {totalPrice}</div>
+            {totalPrice && <Link to="/payment" state={{ email: userEmail, price: totalPrice, rooms: rooms, bool: true, hotelEmail: hotelEmail, images: hotelImages, hotelName: hotelName }} className=" py-4 px-7 rounded-lg hover:bg-white hover:text-mainColor hover:border-[1px] hover:border-mainColor hover:border-solid transition-all duration-300 flex justify-center items-center w-fit bg-mainColor text-white">Buy Now</Link>}
     </div>
   )
 }

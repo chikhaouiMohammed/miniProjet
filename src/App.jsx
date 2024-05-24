@@ -62,6 +62,7 @@ function App() {
 
                   <Route path="/register" element={<SignUp />} />
                   <Route path="/accountUser/User" element={<User />} />
+                  
                   <Route path="/secreter/new-user" element={<NewUser/>} />
                   <Route path="/hotel-search/hotel-profile" element={<HotelProfile/>} />
                   <Route path="/payment/invoice" element={<InvoicePdf/>} />

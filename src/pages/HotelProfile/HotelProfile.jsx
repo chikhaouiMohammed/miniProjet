@@ -8,6 +8,8 @@ import { MdFreeBreakfast } from 'react-icons/md';
 import { CgGym } from 'react-icons/cg';
 import { FaXTwitter } from 'react-icons/fa6';
 import { AuthContext } from '../../context/AuthContext';
+import { Menu,MenuItem, IconButton } from '@mui/material';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const HotelProfile = () => {
   const { currentUser } = useContext(AuthContext);
@@ -115,41 +117,62 @@ const HotelProfile = () => {
       setIsEspanol(hotelData.language.spanish || false);
     }
   }, [hotelData]);
+  const [anchorEl, setAnchorEl] = useState(null);
+      
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <div className="font-poppins container mx-auto text-black">
       {/* Header */}
-      <header className="w-full px-[100px] bg-transparent py-[20px] flex justify-between items-center">
-        <div className="navbar bg-transparent">
-          <div className="flex-1">
-            <a className="btn btn-ghost text-xl">StayDz</a>
-          </div>
-          <div className="flex-none gap-2">
-            <div className="dropdown dropdown-end">
-              <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                <div className="w-10 rounded-full">
-                  <img
-                    alt="Tailwind CSS Navbar component"
-                    src="https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg"
-                  />
-                </div>
-              </div>
-              <ul
-                tabIndex={0}
-                className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52"
-              >
-                <li>
-                  <a className="justify-between">
-                    Profile
-                    <span className="badge">New</span>
-                  </a>
-                </li>
-                <li><a>Logout</a></li>
-              </ul>
+      <header className="w-full px-[100px] py-[20px] flex justify-between items-center mb-[74px] box-shadow">
+     {/* Logo */}
+    <div className="flex-1">
+              <a className="btn btn-ghost text-xl">StayDz</a>
             </div>
-          </div>
-        </div>
-      </header>
+
+      {/* Profile Dropdown */}
+      <div className="relative">
+        <IconButton
+          aria-label="account of current user"
+          aria-controls="menu-appbar"
+          aria-haspopup="true"
+          onClick={handleClick}
+          color="inherit"
+          size="large" // Adjust the size here
+        >
+          <AccountCircleIcon sx={{ fontSize: 38 }} /> {/* Adjust the font size here */}
+        </IconButton>
+        <Menu
+          id="menu-appbar"
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          getContentAnchorEl={null} // Ensure anchorEl doesn't affect menu positioning
+          className="mt-2"
+        >
+          <Link to="/accountUser/User">
+          <MenuItem onClick={handleClose}>Profile New</MenuItem>
+      </Link>
+      <Link to="/login">
+              <MenuItem onClick={handleClose}>Logout</MenuItem>
+            </Link>
+        </Menu>
+      </div>
+    </header>
       {/* Content */}
       <div className="px-[120px]">
         {/* Hotel Images */}
@@ -264,3 +287,7 @@ const HotelProfile = () => {
 };
 
 export default HotelProfile;
+
+
+
+

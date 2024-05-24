@@ -23,7 +23,7 @@ import { Link } from 'react-router-dom';
 import { Menu,MenuItem, IconButton } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { AuthContext } from "../../context/AuthContext";
-import { getVisitorsPerMonth } from "./Data/HotelVisitors";
+import HotelVisitors from "./Data/HotelVisitors";
 import TopCountries from "./Data/TopCountries";
 import HotelRevenue from "./Data/HotelRevenue";
 
@@ -32,17 +32,12 @@ import HotelRevenue from "./Data/HotelRevenue";
 
 function Admin() {
   
-const [visitorsPerMonth, setVisitorsPerMonth] = useState(null);
 
-const fetchVisitorsPerMonth = async () => {
-  const data = await getVisitorsPerMonth();
-  setVisitorsPerMonth(data);
-};
     
    
 
    useEffect(() => {
-    fetchVisitorsPerMonth();    
+     
     fetchHotels(); 
     
   }, []);
@@ -74,10 +69,11 @@ const fetchVisitorsPerMonth = async () => {
   const { currentUser } = useContext(AuthContext);
   const email = currentUser ? currentUser.email : '';
   console.log(email)
-      const [hotelName, setHotelName] = useState("Zianide"); 
-      const [hotelPhone, setHotelPhone] = useState("213506947");
-      const [hotelEmail, setHotelEmail] = useState("Zianides13@gmail.com");
-      
+      const [hotelName, setHotelName] = useState(""); 
+      const [hotelPhone, setHotelPhone] = useState("");
+      const [hotelEmail, setHotelEmail] = useState("");
+      const [localisation, setLocalisation] = useState("");
+
         const fetchHotelData = async (hotelId) => {
             try {
                 
@@ -88,9 +84,11 @@ const fetchVisitorsPerMonth = async () => {
                     const hotelName = hotelDoc.data().name;
                     const hotelPhone=hotelDoc.data().phone;
                     const hotelEmail = hotelDoc.id; 
+                    const localisation=hotelDoc.data().mapLink;
                     setHotelEmail(hotelEmail);
                     setHotelName(hotelName);
                     setHotelPhone(hotelPhone);
+                    setLocalisation(localisation);
                 } else {
                     
                     console.log('Document does not exist');
@@ -170,7 +168,9 @@ const fetchVisitorsPerMonth = async () => {
           <Link to="/accountUser/User">
           <MenuItem onClick={handleClose}>Profile New</MenuItem>
       </Link>
-          <MenuItem onClick={handleClose}>Logout</MenuItem>
+      <Link to="/login">
+              <MenuItem onClick={handleClose}>Logout</MenuItem>
+            </Link>
         </Menu>
       </div>
     </header>
@@ -222,35 +222,19 @@ const fetchVisitorsPerMonth = async () => {
                     {/* Location */}
                     <div className="flex justify-start items-center gap-3 px-[17px] py-[11px] bg-[#F5F5F5] rounded-xl flex-item">
                         <div><FmdGoodOutlinedIcon fontSize="large"/></div>
-                        <div className="flex justify-center items-center gap-2 text-base"><span className="text-black font-semibold">Location:</span><a href="" className="text-blue-600 font-medium">Location Link</a></div>
+                        <div className="flex justify-center items-center gap-2 text-base"><span className="text-black font-semibold">Location:</span><a href={localisation} className="text-blue-600 font-medium">location link</a></div>
                     </div>
                 </div>
-                <h3 className="text-center text-black my-10 font-bold text-2xl">Total Visitors</h3> 
+                <h3 className="text-center text-black my-10 font-bold text-2xl">Hotel Statistic</h3> 
                 {/* Line Chart Dashboard */}
                 <div className="w-full my-10">
                 
-                <Line
-                    style={{width: '100%'}}
-                    data={{
-                      labels: visitorsPerMonth ? visitorsPerMonth.map(({ month }) => month) : [],
-                      datasets: [
-                        {
-                          label: "Visitors per month",
-                          data: visitorsPerMonth ? visitorsPerMonth.map(({ count }) => count) : [],
-                          fill: true,
-                        borderColor: '#1b60e0',
-                        borderWidth: 5,
-                        tension: 0.4,
-                        pointBackgroundColor: 'purple',
-                        pointBorderWidth: 5
-                        },
-                      ],
-                    }}
-                    options={options}
-                  />
+              
       
 </div>
                 <div className="flex justify-center items-center gap-7">
+                  {/* total visitors */}
+                  {hotelEmail && <HotelVisitors hotelEmail={hotelEmail}/>}
                   {/* Top Contries */}
 
                   {hotelEmail && <TopCountries hotelEmail={hotelEmail}/>}

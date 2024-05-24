@@ -36,7 +36,7 @@ function TopCountries({ hotelEmail }) {
 
                     // Iterate over the reservations and count the occurrences of each country
                     reservations.forEach((reservation) => {
-                        const country = reservation.Country;
+                        const country = reservation.country ;
                         // Increment the count for the country or initialize it to 1 if it doesn't exist
                         countryCount[country] = (countryCount[country] || 0) + 1;
                     });

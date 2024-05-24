@@ -35,7 +35,7 @@ function Testimonial() {
                                     <div className='w-[68px] h-[68px] absolute top-7 left-7'><img className=' w-full h-full' src={profileImg} alt="" /></div>
                                     {/* card info */}
                                     <div className='w-full pt-[28px] pb-4 pl-[34px] pr-[68px] text-[#5E6282]'>
-                                        <p className=' font-medium text-[16px] mb-[35px]'>“On the Windows talking painted pasture yet its express parties use. Sure last upon he same as knew next. Of believed or diverted no.”</p>
+                                        <p className=' font-medium text-[16px] mb-[35px]'>“The hotel was amazing! The service was top-notch and the rooms were very clean.”</p>
                                         <h3 className=' text-[20px] font-semibold'>Tlemcen Tourism Director</h3>
                                         <span className=' text-[14px]'>Tlemcen, Algeria</span>
                                     </div>
@@ -47,7 +47,7 @@ function Testimonial() {
                                     <div className='w-[68px] h-[68px] absolute top-7 left-7'><img className=' w-full h-full' src={profileImg} alt="" /></div>
                                     {/* card info */}
                                     <div className='w-full pt-[28px] pb-4 pl-[34px] pr-[68px] text-[#5E6282]'>
-                                        <p className=' font-medium text-[16px] mb-[35px]'>“On the Windows talking painted pasture yet its express parties use. Sure last upon he same as knew next. Of believed or diverted no.”</p>
+                                        <p className=' font-medium text-[16px] mb-[35px]'>“I had a wonderful stay. The staff was friendly and the amenities were great.”</p>
                                         <h3 className=' text-[20px] font-semibold'>Tlemcen Tourism Director</h3>
                                         <span className=' text-[14px]'>Tlemcen, Algeria</span>
                                     </div>
@@ -59,7 +59,7 @@ function Testimonial() {
                                     <div className='w-[68px] h-[68px] absolute top-7 left-7'><img className=' w-full h-full' src={profileImg} alt="" /></div>
                                     {/* card info */}
                                     <div className='w-full pt-[28px] pb-4 pl-[34px] pr-[68px] text-[#5E6282]'>
-                                        <p className=' font-medium text-[16px] mb-[35px]'>“On the Windows talking painted pasture yet its express parties use. Sure last upon he same as knew next. Of believed or diverted no.”</p>
+                                        <p className=' font-medium text-[16px] mb-[35px]'>“Fantastic location and beautiful views. Highly recommend this hotel.”</p>
                                         <h3 className=' text-[20px] font-semibold'>Tlemcen Tourism Director</h3>
                                         <span className=' text-[14px]'>Tlemcen, Algeria</span>
                                     </div>
@@ -71,7 +71,7 @@ function Testimonial() {
                                     <div className='w-[68px] h-[68px] absolute top-7 left-7'><img className=' w-full h-full' src={profileImg} alt="" /></div>
                                     {/* card info */}
                                     <div className='w-full pt-[28px] pb-4 pl-[34px] pr-[68px] text-[#5E6282]'>
-                                        <p className=' font-medium text-[16px] mb-[35px]'>“On the Windows talking painted pasture yet its express parties use. Sure last upon he same as knew next. Of believed or diverted no.”</p>
+                                        <p className=' font-medium text-[16px] mb-[35px]'>“The food was excellent and the rooms were spacious and comfortable. Will definitely come back!.”</p>
                                         <h3 className=' text-[20px] font-semibold'>Tlemcen Tourism Director</h3>
                                         <span className=' text-[14px]'>Tlemcen, Algeria</span>
                                     </div>
@@ -83,7 +83,7 @@ function Testimonial() {
                                     <div className='w-[68px] h-[68px] absolute top-7 left-7'><img className=' w-full h-full' src={profileImg} alt="" /></div>
                                     {/* card info */}
                                     <div className='w-full pt-[28px] pb-4 pl-[34px] pr-[68px] text-[#5E6282]'>
-                                        <p className=' font-medium text-[16px] mb-[35px]'>“On the Windows talking painted pasture yet its express parties use. Sure last upon he same as knew next. Of believed or diverted no.”</p>
+                                        <p className=' font-medium text-[16px] mb-[35px]'>“An unforgettable experience. The staff went above and beyond to ensure we had a great stay.”</p>
                                         <h3 className=' text-[20px] font-semibold'>Tlemcen Tourism Director</h3>
                                         <span className=' text-[14px]'>Tlemcen, Algeria</span>
                                     </div>

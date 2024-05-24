@@ -22,7 +22,8 @@ function FrontDesk() {
     instagramLink: '',
     xLink: '',
     abouy:'',
-    policy:''
+    policy:'',
+    secretaires: []
   });
 
   const [hotelImages, setHotelImages] = useState([]);
@@ -112,7 +113,7 @@ const handleImageChange = async (e) => {
     }
   }
 };
-
+/*
 const updateHotelData = async () => {
   try {
     const hotelRef = doc(db, 'hotelList', 'Tlemcen', 'hotels', email);
@@ -126,6 +127,66 @@ const updateHotelData = async () => {
     console.error('Error updating hotel data:', error);
   }
 };
+*/
+
+
+const updateHotelData = async () => {
+  try {
+    // Get the new secretaire email and password from the input fields
+    const secretaireEmail = document.getElementById('secretaireEmailInput').value;
+    const secretairePassword = document.getElementById('secretairePasswordInput').value;
+
+    // Ensure the secretaire email and password are provided
+    if (!secretaireEmail || !secretairePassword) {
+      console.error('Secretaire email and password are required');
+      return;
+    }
+
+    // Reference to the specific hotel user document
+    const hotelUserRef = doc(db, 'hotelUsers', email);
+
+    // Fetch the current data
+    const hotelUserDoc = await getDoc(hotelUserRef);
+    if (!hotelUserDoc.exists()) {
+      console.error('Hotel user document not found');
+      return;
+    }
+
+    // Prepare the new secretaire data
+    const newSecretaireData = {
+      [secretaireEmail]: {
+        email: secretaireEmail,
+        password: secretairePassword
+      }
+    };
+
+    // Update the secretaire map inside the hotel user document
+    await setDoc(hotelUserRef, {
+      secretaire: newSecretaireData
+    }, { merge: true });
+
+    // Ensure hotelInfo.secretaires is an array
+    if (!Array.isArray(hotelInfo.secretaires)) {
+      hotelInfo.secretaires = [];
+    }
+
+    // Update the hotel data in the hotelList collection
+    const hotelRef = doc(db, 'hotelList', 'Tlemcen', 'hotels', email);
+    await setDoc(hotelRef, {
+      ...hotelInfo,
+      About: document.getElementById('aboutTextarea').value, // Get the value of the about textarea
+      Policy: document.getElementById('policyTextarea').value, // Get the value of the policy textarea
+      // Add the new secretaire email to the list of secretaires
+      secretaires: [...hotelInfo.secretaires, secretaireEmail]
+    }, { merge: true }); // Merge the new data with existing data instead of overwriting
+
+    console.log('Hotel data updated successfully with new secretaire!');
+  } catch (error) {
+    console.error('Error updating hotel data:', error);
+  }
+};
+
+
 
   return (
     <div className="font-poppins w-full p-10">
@@ -201,18 +262,8 @@ const updateHotelData = async () => {
             {/* Location on the map */}
             <div>
                 <div className="text-2xl font-semibold mb-4">What is your location information ?</div>
-                <label className="form-control w-full max-w-xs">
-                <div className="label">
-                    <span className="label-text text-lg font-semibold my-3">Latitude</span>
-                </div>
-                <input type="text" placeholder="Type here" className="input input-bordered input-accent w-full max-w-xs" />
-                </label>
-                <label className="form-control w-full max-w-xs">
-                <div className="label">
-                    <span className="label-text text-lg font-semibold my-3">Longitude</span>
-                </div>
-                <input type="text" placeholder="Type here" className="input input-bordered input-accent w-full max-w-xs" />
-                </label>
+              
+                
                 <label className="form-control w-full max-w-xs">
                 <div className="label">
                     <span className="label-text text-lg font-semibold my-3">Google map link</span>
@@ -247,6 +298,22 @@ const updateHotelData = async () => {
                     </div>
                     <input type="text" placeholder="Link here" className="input input-bordered input-accent w-full max-w-xs" value={hotelInfo.X_Link} onChange={(e) => setHotelInfo({ ...hotelInfo, X_Link: e.target.value })} />
                 </label>
+                <div>
+                <div className="text-2xl font-semibold mt-5">Add New Secrerataire</div>
+                <label className="form-control w-full max-w-xs">
+                    <div className="label">
+                        <span className="label-text text-lg font-semibold my-3">Email:</span>
+                    </div>
+                    <input type="text" placeholder="Type here" className="input input-bordered input-accent w-full max-w-xs" id="secretaireEmailInput"  />
+                </label>
+                <label className="form-control w-full max-w-xs">
+                    <div className="label">
+                        <span className="label-text text-lg font-semibold my-3">Password:</span>
+                    </div>
+                    <input type="text" placeholder="Type here" className="input input-bordered input-accent w-full max-w-xs" id="secretairePasswordInput"  />
+                </label>
+                </div>
+                
             </div>
         </div>
         {/* Hotel Images */}

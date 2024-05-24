@@ -10,6 +10,8 @@ import { db } from "../../Data/Firebase";
 import profileAvatar from '../../images/blank-profile-picture-973460_1280.png'
 import { AuthContext } from '../../context/AuthContext';
 import { useContext, useEffect, useState } from 'react';
+import { Menu,MenuItem, IconButton } from '@mui/material';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 const Secretaire = () => {
 
   const { currentUser } = useContext(AuthContext);
@@ -17,7 +19,6 @@ const Secretaire = () => {
   const [data, setData] = useState({});
   const [reservationUsers, setReservationUsers] = useState([])
 
-  const tlemcenDocRef = doc(collection(db, "hotelList"), "Tlemcen");
 
   useEffect(() => {
       const fetchHotelUserId = async () => {
@@ -36,6 +37,7 @@ const Secretaire = () => {
 
       fetchHotelUserId();
   }, [currentUser.email]);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,37 +66,150 @@ const Secretaire = () => {
 
   console.log(reservationUsers)
     
- 
+  const [anchorEl, setAnchorEl] = useState(null);
+      
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
 
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+/*
+  const email = currentUser ? currentUser.email : '';
+  console.log(email)
+  const [checkIns, setCheckIns] = useState(0);
+  const [checkOuts, setCheckOuts] = useState(0);
+  useEffect(() => {
+    const fetchReservationData = async () => {
+      try {
+       
+        const hotelRef = doc(collection(db, 'hotelList', 'Tlemcen', 'hotels'), email);
+        const hotelDoc = await getDoc(hotelRef);
 
+        if (hotelDoc.exists()) {
+          
+          const reservationData = hotelDoc.data().reservation;
+          
+          
+          
+          const checkInsCount = reservationData.filter(entry => entry['checkInDate']).length;
+          const checkOutsCount = reservationData.filter(entry => entry['checkOutDate']).length;
+          
+          
+          setCheckIns(checkInsCount);
+          setCheckOuts(checkOutsCount);
+        } else {
+          
+          console.log('Document does not exist');
+        }
+      } catch (error) {
+        console.error('Error fetching document:', error);
+      }
+    };
+
+    if (email) {
+      fetchReservationData();
+    }
+  }, [email]);
+
+ const [totalRooms, setTotalRooms] = useState(0);
+  
+      useEffect(() => {
+    const fetchHotelData = async () => {
+      try {
+        const hotelRef = doc(db, 'hotelList', 'Tlemcen', 'hotels', email );
+        const hotelDoc = await getDoc(hotelRef);
+
+        if (hotelDoc.exists()) {
+          const totalRooms = hotelDoc.data().TotalRoom;
+          setTotalRooms(totalRooms);
+        } else {
+          console.log("Hotel document not found for the current user");
+        }
+      } catch (error) {
+        console.error('Error fetching hotel data:', error);
+      }
+    };
+    if (email) {
+      fetchHotelData();
+    }
+    
+  }, [email]);
+
+  const [occupiedRooms, setOccupiedRooms] = useState(0);
+  const availableRooms = totalRooms - occupiedRooms;
+  useEffect(() => {
+  const calculateOccupiedRooms = async () => {
+    try {
+      const hotelRef = doc(collection(db, 'hotelList', 'Tlemcen', 'hotels'), email);
+      const hotelDoc = await getDoc(hotelRef);
+
+      if (hotelDoc.exists()) {
+        const reservationData = hotelDoc.data().reservation;
+        const checkInsCount = reservationData.filter(entry => entry['checkInDate']).length;
+        const occupiedRoomsCount = checkInsCount ;
+        setOccupiedRooms(occupiedRoomsCount);
+      } else {
+        console.log('Document does not exist');
+      }
+    } catch (error) {
+      console.error('Error fetching document:', error);
+    }
+  };
+  if (email) {
+    calculateOccupiedRooms();
+  }
+
+  }, [email]);
+  */
   return (
     
     <div className=' container mx-auto font-poppins'>
-      <header className='w-full px-[100px] py-[20px] flex justify-between items-center mb-[100px]'>
-              <div className="navbar bg-transparent">
-                  <div className="flex-1">
-                      <a className="btn btn-ghost text-xl">StayDz</a>
-                  </div>
-                  <div className="flex-none gap-2">
-                      <div className="dropdown dropdown-end">
-                      <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
-                          <div className="w-10 rounded-full">
-                          <img alt="Tailwind CSS Navbar component" src="https:daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg" />
-                          </div>
-                      </div>
-                      <ul tabIndex={0} className="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-                          <li>
-                          <a className="justify-between">
-                              Profile
-                              <span className="badge">New</span>
-                          </a>
-                          </li>
-                          <li><a>Logout</a></li>
-                      </ul>
-                      </div>
-                  </div>
-              </div>
-          </header>
+        <header className="w-full px-[100px] py-[20px] flex justify-between items-center mb-[74px] box-shadow">
+     {/* Logo */}
+    <div className="flex-1">
+              <a className="btn btn-ghost text-xl">StayDz</a>
+            </div>
+
+      {/* Profile Dropdown */}
+      <div className="relative">
+        <IconButton
+          aria-label="account of current user"
+          aria-controls="menu-appbar"
+          aria-haspopup="true"
+          onClick={handleClick}
+          color="inherit"
+          size="large" // Adjust the size here
+        >
+          <AccountCircleIcon sx={{ fontSize: 38 }} /> {/* Adjust the font size here */}
+        </IconButton>
+        <Menu
+          id="menu-appbar"
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'right',
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          getContentAnchorEl={null} // Ensure anchorEl doesn't affect menu positioning
+          className="mt-2"
+        >
+          <Link to="/accountUser/User">
+          <MenuItem onClick={handleClose}>Profile New</MenuItem>
+      </Link>
+      <Link to="/login">
+              <MenuItem onClick={handleClose}>Logout</MenuItem>
+            </Link>
+         
+        </Menu>
+      </div>
+    </header>
       <div className='mb-20 shadow rounded-xl'>
         {/* the date */}
         <div className='text-center font-semibold text-xl my-10'>
@@ -157,103 +272,12 @@ const Secretaire = () => {
               </div>
             </div>
       </div>
-    <div className='flex justify-between space-x-20 mb-40'>
-      <div className="featured h-[80px] w-[150px] ">
-        <div className="top">
-          <h1 className="title">Total Revenue</h1>
-          <MoreVertIcon fontSize="small" />
-        </div>
-        <div className="bottom">
-          <div className="featuredChart">
-            <CircularProgressbar value={70} text={"70%"} strokeWidth={10} />
-          </div>
-          <p className="title">Total sales made today</p>
-          <p className="amount">$420</p>
-          <p className="desc">
-            Previous transactions processing. Last payments may not be included.
-          </p>
-          <div className="summary">
-            <div className="item">
-              <div className="itemTitle">Today</div>
-              <div className="itemResult negative">
-                <KeyboardArrowDownIcon fontSize="small"/>
-                <div className="resultAmount">$12.4k</div>
-              </div>
-            </div>
-            <div className="item">
-              <div className="itemTitle">Last Week</div>
-              <div className="itemResult positive">
-                <KeyboardArrowUpOutlinedIcon fontSize="small"/>
-                <div className="resultAmount">$12.4k</div>
-              </div>
-            </div>
-            <div className="item">
-              <div className="itemTitle">Last Month</div>
-              <div className="itemResult positive">
-                <KeyboardArrowUpOutlinedIcon fontSize="small"/>
-                <div className="resultAmount">$12.4k</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className='shadow'>
-        <div className='flex items-start mb-5'>
-        <h1 className='text-2xl font-semibold'>Room Status</h1>
-        </div>
-        <div className='flex justify-between space-x-12'>
-        <div className='flex flex-col gap-5'>
-        <div className='flex justify-between space-x-12'>
-        <h2 className='text-base font-normal'>Available room</h2>
-        <span className='text-base font-light text-slate-600'>104</span>
-        </div>
-      <div className='flex justify-between'>
-      <h2 className='text-base font-normal'>Single Sharing</h2>
-      <span className='text-base font-light text-slate-600'>104</span>
-      </div>
-      <div className='flex justify-between'>
-      <h2 className='text-base font-normal'>Double Sharing</h2>
-      <span className='text-base font-light text-slate-600'>104</span>
-      </div>
-      <div className='flex justify-between'>
-      <h2 className='text-base font-normal'>Triple Sharing</h2>
-      <span className='text-base font-light text-slate-600'>104</span>
-      </div>
-      <div className='flex justify-between'>
-      <h2 className='text-base font-normal'>Vip</h2>
-      <span className='text-base font-light text-slate-600'>104</span>
-      </div>
-    </div>
-    <div className='flex flex-col gap-5'>
-        <div className='flex justify-between space-x-12'>
-        <h2 className='text-base font-normal'>Occupied room </h2>
-        <span className='text-base font-light text-slate-600'>104</span>
-        </div>
-      <div className='flex justify-between'>
-        <h2 className='text-base font-normal'>Single sharing</h2>
-        <span className='text-base font-light text-slate-600'>104</span>
-      </div>
-      <div className='flex justify-between'>
-        <h2 className='text-base font-normal'>Double Sharing</h2>
-        <span className='text-base font-light text-slate-600'>104</span>
-      </div>
-      <div className='flex justify-between'>
-      <h2 className='text-base font-normal'>triple Sharing</h2>
-      <span className='text-base font-light text-slate-600'>104</span>
-      </div>
-      <div className='flex justify-between'>
-        <h2 className='text-base font-normal'>Vip</h2>
-        <span className='text-base font-light text-slate-600'>104</span>
-      </div>
-    </div>
-    </div>
-    </div>
-    </div>
+    
     
       <div className="datatable">
         <div className="datatableTitle">
           vew all Users
-          <Link to="/secreter/new-user" className="link">
+          <Link state={{email: hotelEmail}} to="/secreter/new-user" className="link">
             Add New
           </Link>
         </div>

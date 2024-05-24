@@ -21,7 +21,10 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../Data/Firebase';
 import { useTheme } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
-
+import imgHotel from '../../assets/44895548.c94c78db.640-1.jpg'
+import imghotel1 from '../../assets/horizontal-tlemcen.jpg'
+import imghotel2 from '../../assets/5014bf9705e597e4d1123f58b425eb5b_M.jpg'
+import imghotel3 from '../../assets/tlemcene.jpg'
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -211,41 +214,43 @@ function HotelSearch() {
           <Link to="/accountUser/User">
             <MenuItem onClick={handleClose}>Profile New</MenuItem>
           </Link>
-          <MenuItem onClick={handleClose}>Logout</MenuItem>
+          <Link to="/login">
+              <MenuItem onClick={handleClose}>Logout</MenuItem>
+            </Link>
         </Menu>
       </div>
       </header>
         {/* Images Carousel */}
         <div className="carousel w-full">
-            <div id="slide1" className="carousel-item relative w-full">
-                <img src="https://daisyui.com/images/stock/photo-1625726411847-8cbb60cc71e6.jpg" className="w-full" />
-                <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-                <a href="#slide4" className="btn btn-circle">❮</a> 
-                <a href="#slide2" className="btn btn-circle">❯</a>
-                </div>
-            </div> 
-            <div id="slide2" className="carousel-item relative w-full">
-                <img src="https://daisyui.com/images/stock/photo-1609621838510-5ad474b7d25d.jpg" className="w-full" />
-                <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-                <a href="#slide1" className="btn btn-circle">❮</a> 
-                <a href="#slide3" className="btn btn-circle">❯</a>
-                </div>
-            </div> 
-            <div id="slide3" className="carousel-item relative w-full">
-                <img src="https://daisyui.com/images/stock/photo-1414694762283-acccc27bca85.jpg" className="w-full" />
-                <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-                <a href="#slide2" className="btn btn-circle">❮</a> 
-                <a href="#slide4" className="btn btn-circle">❯</a>
-                </div>
-            </div> 
-            <div id="slide4" className="carousel-item relative w-full">
-                <img src="https://daisyui.com/images/stock/photo-1665553365602-b2fb8e5d1707.jpg" className="w-full" />
-                <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-                <a href="#slide3" className="btn btn-circle">❮</a> 
-                <a href="#slide1" className="btn btn-circle">❯</a>
-                </div>
-            </div>
-        </div>
+  <div id="slide1" className="carousel-item relative w-full h-[500px]">
+    <img src={imgHotel} className="w-full h-full" />
+    <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
+      <a href="#slide4" className="btn btn-circle">❮</a> 
+      <a href="#slide2" className="btn btn-circle">❯</a>
+    </div>
+  </div> 
+  <div id="slide2" className="carousel-item relative w-full h-[500px]">
+    <img src={imghotel1}className="w-full h-full" />
+    <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
+      <a href="#slide1" className="btn btn-circle">❮</a> 
+      <a href="#slide3" className="btn btn-circle">❯</a>
+    </div>
+  </div> 
+  <div id="slide3" className="carousel-item relative w-full h-[500px]">
+    <img src={imghotel2} className="w-full h-full" />
+    <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
+      <a href="#slide2" className="btn btn-circle">❮</a> 
+      <a href="#slide4" className="btn btn-circle">❯</a>
+    </div>
+  </div> 
+  <div id="slide4" className="carousel-item relative w-full h-[500px]">
+    <img src={imghotel3} className="w-full h-full" />
+    <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
+      <a href="#slide3" className="btn btn-circle">❮</a> 
+      <a href="#slide1" className="btn btn-circle">❯</a>
+    </div>
+  </div>
+</div>
         <section className=" w-full container mx-auto pb-[63px]">
             {/* CheckIn & CheckOut and search info */}
             <div className='px-[24px] py-[32px] flex justify-center gap-5 items-center box-shadow'>
@@ -255,7 +260,7 @@ function HotelSearch() {
                     <Box sx={{width:'100%'}}>
                         <LocalizationProvider  dateAdapter={AdapterDayjs}>
                             <DemoContainer components={['DateTimePicker']}>
-                                <DateTimePicker label="Check out date"  onChange={(date) => handleCheckInDateChange(date)}/>
+                                <DateTimePicker label="Check in date"  onChange={(date) => handleCheckInDateChange(date)}/>
                             </DemoContainer>
                         </LocalizationProvider>
                     </Box>

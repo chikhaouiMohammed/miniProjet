@@ -5,6 +5,7 @@ import { hotelTotalRevenue } from "../../../Data/HotelOwnerData";
 import { db } from "../../../Data/Firebase";
 import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { AuthContext } from "../../../context/AuthContext";
+import HotelRevenue from "../Data/HotelRevenue";
 
 function Dashboard() {
     const [revenue, setRevenue] = useState({
@@ -332,9 +333,10 @@ useEffect(() => {
             </div>
             {/* Total Revenue */}
             <div className="w-full mt-10">
-            <h2 className='text-3xl font-semibold mb-10'>Total Revenue</h2>
-                    <Line style={{width:"98%"}} data={revenue} options={options}/>
-            </div>
+    <h2 className='text-3xl font-semibold mb-10'>Total Revenue</h2>
+    {email && <HotelRevenue hotelEmail={email} />}
+</div>
+
       </div>
   )
 }

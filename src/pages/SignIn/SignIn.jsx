@@ -1,4 +1,4 @@
-import imglogin1 from '../../assets/25f3792bb151520d1ae87926e8e6633a 1.png';
+
 import { FcGoogle } from "react-icons/fc";
 import { TfiEmail } from "react-icons/tfi";
 import { RiLockPasswordLine } from "react-icons/ri";
@@ -11,7 +11,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { adminRoute, hotelOwnerRoute, hotelSearchRoute, secreterRoute } from '../../Routes';
 import { AuthContext } from '../../context/AuthContext';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-
+import imglogin from '../../assets/1698.png_860.png'
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [secEmail, setSecEmail] = useState('');
@@ -152,14 +152,15 @@ const SignIn = () => {
   return (
     <div className='w-full h-screen flex items-start'>
       <div className='relative w-1/2 h-full flex flex-col'>
-        <img className='h-full w-full object-cover' src={imglogin1} alt="" />
+        <img className='h-full w-full object-cover' src={imglogin} alt="" />
+        
       </div>
       <div className='w-1/2 h-full bg-[#FFFFFF] flex flex-col p-20 justify-between items-center '>
-        <div className='w-full flex flex-col max-w-[400px]'>
+        <div className='w-full flex flex-col max-w-[500px]'>
         {/* You can open the modal using document.getElementById('ID').showModal() method */}
         <button className="btn bg-red-500" onClick={()=>document.getElementById('my_modal_3').showModal()}>Before Login Chose Your Role Here !</button>
         <dialog id="my_modal_3" className="modal">
-          <div className="modal-box">
+          <div className="modal-box ">
             <form method="dialog">
               {/* if there is a button in form, it will close the modal */}
               <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
@@ -224,13 +225,8 @@ const SignIn = () => {
           <div className='w-full flex flex-col mt-8 pt-8'>
             <button className='w-full my-2 bg-mainColor rounded-3xl shadow p-4 text-center text-white flex items-center justify-center font-medium' onClick={handleSignIn}>Login</button>
           </div>
-          <div className='w-full flex items-center justify-center relative py-7'>
-            <p className='text-[#B5B5B5] font-medium text-xl'>Or continue with</p>
-          </div>
-          <div className='flex items-center justify-center space-x-6 pt-4'>
-            <a href=""><img src={iconfcb} alt="" className='w-12 h-12' /></a>
-            <i><a href=""><FcGoogle className='w-10 h-10' /></a></i>
-          </div>
+          
+          
         </div>
       </div>
       {loading && (
