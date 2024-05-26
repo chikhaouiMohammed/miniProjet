@@ -11,7 +11,6 @@ function  Header() {
     return (
         <header className='container mx-auto px-[40px] font-poppins flex justify-between items-center py-[50px] text-mainTextColor'>
             {/* Logo */}
-            <div className='text-[32px] font-bold cursor-pointer'>StayDz</div>
             <div className='w-[250px] cursor-pointer'><img className='w-full h-full' src={logo} alt="" /></div>
 
             {/* Navbar */}
