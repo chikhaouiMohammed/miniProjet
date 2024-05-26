@@ -40,7 +40,7 @@ function Footer() {
                         </div>
                         <div className='flex justify-center items-center gap-2'>
                             <div><EmailIcon/></div>
-                            <span>+213 656 03 53 64</span>
+                            <span>chmmed8@gmail.com</span>
                         </div>
                     </div>
                     {/* Follow US on Social media */}

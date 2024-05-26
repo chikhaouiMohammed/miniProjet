@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom';
 import { Menu, MenuItem, IconButton } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import MenuIcon from '@mui/icons-material/Menu';
+import logo from "../../images/logo.png"
 
 function HotelOwner() {
   
@@ -79,11 +80,9 @@ function HotelOwner() {
           </div>
         </header>
   */}
-  <header className="w-full px-[100px] py-[20px] flex justify-between items-center mb-[74px] box-shadow">
+  <header className="w-full h-[100px] overflow-hidden px-[100px] py-[20px] flex justify-between items-center mb-[74px] box-shadow">
      {/* Logo */}
-     <div className="flex-1">
-              <a className="btn btn-ghost text-xl">StayDz</a>
-            </div>
+      <div className='w-[250px] cursor-pointer'><img className='w-full h-full' src={logo} alt="" /></div>
 
       {/* Profile Dropdown */}
       <div className="relative">

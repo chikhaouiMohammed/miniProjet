@@ -11,6 +11,8 @@ import { AuthContext } from '../../context/AuthContext';
 import { Menu,MenuItem, IconButton } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
+import logo from "../../images/logo.png"
+
 const HotelProfile = () => {
   const { currentUser } = useContext(AuthContext);
   const userEmail = currentUser.email;
@@ -131,48 +133,47 @@ const HotelProfile = () => {
     <div className="font-poppins container mx-auto text-black">
       {/* Header */}
       <header className="w-full px-[100px] py-[20px] flex justify-between items-center mb-[74px] box-shadow">
-     {/* Logo */}
-    <div className="flex-1">
-              <a className="btn btn-ghost text-xl">StayDz</a>
-            </div>
-
-      {/* Profile Dropdown */}
-      <div className="relative">
-        <IconButton
-          aria-label="account of current user"
-          aria-controls="menu-appbar"
-          aria-haspopup="true"
-          onClick={handleClick}
-          color="inherit"
-          size="large" // Adjust the size here
-        >
-          <AccountCircleIcon sx={{ fontSize: 38 }} /> {/* Adjust the font size here */}
-        </IconButton>
-        <Menu
-          id="menu-appbar"
-          anchorEl={anchorEl}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-          getContentAnchorEl={null} // Ensure anchorEl doesn't affect menu positioning
-          className="mt-2"
-        >
-          <Link to="/accountUser/User">
-          <MenuItem onClick={handleClose}>Profile New</MenuItem>
-      </Link>
-      <Link to="/login">
+        {/* Logo */}
+        <div className="flex-1">
+          <a className="btn btn-ghost text-xl">StayDz</a>
+        </div>
+        {/* Profile Dropdown */}
+        <div className="relative">
+          <IconButton
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={handleClick}
+            color="inherit"
+            size="large" // Adjust the size here
+          >
+            <AccountCircleIcon sx={{ fontSize: 38 }} /> {/* Adjust the font size here */}
+          </IconButton>
+          <Menu
+            id="menu-appbar"
+            anchorEl={anchorEl}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right',
+            }}
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+            getContentAnchorEl={null} // Ensure anchorEl doesn't affect menu positioning
+            className="mt-2"
+          >
+            <Link to="/accountUser/User">
+              <MenuItem onClick={handleClose}>Profile New</MenuItem>
+            </Link>
+            <Link to="/login">
               <MenuItem onClick={handleClose}>Logout</MenuItem>
             </Link>
-        </Menu>
-      </div>
-    </header>
+          </Menu>
+        </div>
+      </header>
       {/* Content */}
       <div className="px-[120px]">
         {/* Hotel Images */}
@@ -283,6 +284,7 @@ const HotelProfile = () => {
       {totalPrice === 0 && <button className="absolute left-[45%] py-4 px-7 rounded-lg hover:bg-white hover:text-mainColor hover:border-[1px] hover:border-mainColor hover:border-solid transition-all duration-300 flex justify-center items-center w-fit bg-mainColor text-white">Buy Now</button>}
       {totalPrice && <Link to="/payment" state={{ email: userEmail, price: totalPrice, rooms: rooms, hotelEmail: hotelEmail, bool: true, images: hotelImages, hotelName: hotelName }} className="absolute left-[45%] py-4 px-7 rounded-lg hover:bg-white hover:text-mainColor hover:border-[1px] hover:border-mainColor hover:border-solid transition-all duration-300 flex justify-center items-center w-fit bg-mainColor text-white">Buy Now</Link>}
     </div>
+    
   );
 };
 

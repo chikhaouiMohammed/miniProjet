@@ -26,7 +26,7 @@ import { AuthContext } from "../../context/AuthContext";
 import HotelVisitors from "./Data/HotelVisitors";
 import TopCountries from "./Data/TopCountries";
 import HotelRevenue from "./Data/HotelRevenue";
-
+import logo from "../../images/logo.png"
 
 
 
@@ -131,11 +131,9 @@ function Admin() {
 
   return (
     <div className="font-poppins">
-      <header className="w-full px-[100px] py-[20px] flex justify-between items-center mb-[74px] box-shadow">
+      <header className="w-full h-[100px] overflow-hidden px-[100px] py-[20px] flex justify-between items-center mb-[74px] box-shadow">
      {/* Logo */}
-    <div className="flex-1">
-              <a className="btn btn-ghost text-xl">StayDz</a>
-            </div>
+     <div className='w-[250px] cursor-pointer'><img className='w-full h-full' src={logo} alt="" /></div>
 
       {/* Profile Dropdown */}
       <div className="relative">
@@ -177,7 +175,7 @@ function Admin() {
         {/* Content */}
         <div className="mt-3 w-full flex justify-between items-center flex-nowrap">
             {/* Aside bar */}
-            <div className=" rounded-r-3xl border-solid border-[1px] border-gray-300 overflow-hidden ">
+            <div className=" rounded-r-3xl border-solid border-[1px] px-0 border-gray-300 overflow-hidden ">
                 {/* Heading */}
                 <h2 className="text-center bg-[#cec9c96b] py-[24px] font-bold text-[26px]">Hotels</h2>
                 {/* Hotels List */}

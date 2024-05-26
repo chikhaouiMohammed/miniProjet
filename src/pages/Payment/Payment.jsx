@@ -29,6 +29,9 @@ import { db } from '../../Data/Firebase';
 import { Menu,MenuItem, IconButton } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { Link } from 'react-router-dom';
+import logo from "../../images/logo.png"
+
+
 function Payment() {
     const [cardDetails, setCardDetails] = useState({});
     const [checkInDate, setCheckInDate] = useState(null);
@@ -102,17 +105,17 @@ const handleAddReservation = async () => {
                     
                     navigate('/payment/invoice', {state: {hotelName: hotelName, checkInDate: checkInDate,checkOutDate : checkOutDate, rooms: roomType, fullName: fullName, phone: phone, country: country,cardDetails: cardDetails, totalPrice: totalPrice }})
                 } else {
-                    console.error("Hotel document does not exist!");
+                    alert("Hotel document does not exist!");
                 }
             } catch(error) {
-                console.error("Error adding reservation:", error);
+                alert("Error adding reservation:", error);
             }
         } else {
-            console.error("Please fill in all required fields.");
+            alert("Please fill in all required fields.");
             // Optionally, display an error message or take other actions
         }
     } else {
-        console.error("User is not from a guest. Reservation not allowed.");
+        alert("User is not from a guest. Reservation not allowed.");
         // Optionally, display an error message or take other actions
     }
 };
@@ -127,49 +130,47 @@ const handleClose = () => {
 };
 return (
 <div className=' container mx-auto font-poppins'>
-<header className="w-full px-[100px] py-[20px] flex justify-between items-center mb-[74px] box-shadow">
-     {/* Logo */}
-    <div className="flex-1">
-              <a className="btn btn-ghost text-xl">StayDz</a>
-            </div>
+<header className="w-full h-[100px] overflow-hidden px-[100px] py-[20px] flex justify-between items-center mb-[74px] box-shadow">
+                {/* Logo */}
+                <div className='w-[250px] cursor-pointer'><img className='w-full h-full' src={logo} alt="" /></div>
 
-      {/* Profile Dropdown */}
-      <div className="relative">
-        <IconButton
-          aria-label="account of current user"
-          aria-controls="menu-appbar"
-          aria-haspopup="true"
-          onClick={handleClick}
-          color="inherit"
-          size="large" // Adjust the size here
-        >
-          <AccountCircleIcon sx={{ fontSize: 38 }} /> {/* Adjust the font size here */}
-        </IconButton>
-        <Menu
-          id="menu-appbar"
-          anchorEl={anchorEl}
-          anchorOrigin={{
-            vertical: 'bottom',
-            horizontal: 'right',
-          }}
-          transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-          getContentAnchorEl={null} // Ensure anchorEl doesn't affect menu positioning
-          className="mt-2"
-        >
-          <Link to="/accountUser/User">
-            <MenuItem onClick={handleClose}>Profile New</MenuItem>
-          </Link>
-          <Link to="/login">
-              <MenuItem onClick={handleClose}>Logout</MenuItem>
-            </Link>
-        </Menu>
-      </div>
-      </header>
+                {/* Profile Dropdown */}
+                <div className="relative">
+                    <IconButton
+                        aria-label="account of current user"
+                        aria-controls="menu-appbar"
+                        aria-haspopup="true"
+                        onClick={handleClick}
+                        color="inherit"
+                        size="large" // Adjust the size here
+                    >
+                        <AccountCircleIcon sx={{ fontSize: 38 }} /> {/* Adjust the font size here */}
+                    </IconButton>
+                    <Menu
+                        id="menu-appbar"
+                        anchorEl={anchorEl}
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                        }}
+                        transformOrigin={{
+                            vertical: 'top',
+                            horizontal: 'right',
+                        }}
+                        open={Boolean(anchorEl)}
+                        onClose={handleClose}
+                        getContentAnchorEl={null} // Ensure anchorEl doesn't affect menu positioning
+                        className="mt-2"
+                    >
+                        <Link to="/accountUser/User">
+                            <MenuItem onClick={handleClose}>Profile New</MenuItem>
+                        </Link>
+                        <Link to="/login">
+                            <MenuItem onClick={handleClose}>Logout</MenuItem>
+                        </Link>
+                    </Menu>
+                </div>
+            </header>
 
       {/* payment page content */}
         <div className='flex justify-end gap-[20%] items-center  flex-nowrap  pb-40'>
