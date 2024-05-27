@@ -26,6 +26,18 @@ import imgHotel from '../../assets/44895548.c94c78db.640-1.jpg'
 import imghotel1 from '../../assets/horizontal-tlemcen.jpg'
 import imghotel2 from '../../assets/5014bf9705e597e4d1123f58b425eb5b_M.jpg'
 import imghotel3 from '../../assets/tlemcene.jpg'
+import ibisImg from '../../assets/exterior-view.jpg'
+import renissenceImg from '../../assets/renaissance.jpg'
+import zianidImg from '../../assets/zianides.webp'
+
+const hotelCardsList = [
+    ibisImg,
+    renissenceImg,
+    zianidImg
+]
+
+
+
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {
@@ -220,14 +232,8 @@ function HotelSearch() {
                 </div>
             </header>
             {/* Images Carousel */}
-            <div className="carousel w-full">
-                <div id="slide1" className="carousel-item relative w-full h-[500px]">
-                    <img src={imgHotel} className="w-full h-full" />
-                    <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
-                        <a href="#slide4" className="btn btn-circle">❮</a>
-                        <a href="#slide2" className="btn btn-circle">❯</a>
-                    </div>
-                </div>
+            <div className="carousel h-[500px] w-full">
+                
                 <div id="slide2" className="carousel-item relative w-full h-[500px]">
                     <img src={imghotel1} className="w-full h-full" />
                     <div className="absolute flex justify-between transform -translate-y-1/2 left-5 right-5 top-1/2">
@@ -424,13 +430,13 @@ function HotelSearch() {
                         <div className='flex flex-col justify-center items-center w-full mt-14 gap-10'>
                             {/* Map through filtered hotels and generate hotel cards */}
                             {filteredHotels.length > 0 ? (
-                                filteredHotels.map((hotel) => (
+                                filteredHotels.map((hotel, index) => (
                                     <div key={hotel.id} className='w-full flex justify-center items-start rounded-2xl overflow-hidden box-shadow-two'>
                                         {/* image */}
                                         <div className='flex-shrink-0 w-[300px] h-[300px]'>
                                             {/* You can render hotel images dynamically from the hotel data */}
                                             {hotel.rooms && hotel.rooms.length > 0 && (
-                                                <img className='w-full h-full' src={hotel.rooms[0].images[0]} alt={hotel.name} />
+                                                <img className='w-full h-full' src={hotelCardsList[index % hotelCardsList.length]} alt={hotel.name} />
                                             )}
                                         </div>
                                         {/* info */}
@@ -456,8 +462,7 @@ function HotelSearch() {
                                                         {hotel.rating} Stars Hotel
                                                     </div>
                                                     <div className='flex justify-center items-center gap-2'>
-
-
+                                                        {/* Additional icons or elements */}
                                                     </div>
                                                 </div>
                                                 <div className='flex justify-start items-center gap-2 mt-2'>
@@ -466,7 +471,6 @@ function HotelSearch() {
                                                         <span className='text-[#112211] text-[18px]'>Very Good</span> {hotel.reviews} reviews
                                                     </div>
                                                 </div>
-                                                {/* line */}
                                             </div>
                                             <div className='h-[1px] w-full mt-5 bg-gray-400'></div>
                                             {/* Buy & Favorite Button */}
@@ -485,6 +489,7 @@ function HotelSearch() {
                                 <p>No hotels found.</p>
                             )}
                         </div>
+
 
 
                         {/* Show more results */}

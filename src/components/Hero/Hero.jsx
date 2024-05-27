@@ -40,14 +40,10 @@ const Hero = () => {
           </p>
           {/* Buttons */}
           <div className='flex justify-center items-center gap-[44px]'>
-            <div className='px-[27px] py-[17px] text-lg bg-mainColor text-white rounded-xl cursor-pointer transition-all duration-500 ease-in-out hover:bg-transparent hover:text-mainTextColor border-[1px] border-white hover:border-mainColor border-solid shadow-2xl'>
+            <a href='#footer' className='px-[27px] py-[17px] text-lg bg-mainColor text-white rounded-xl cursor-pointer transition-all duration-500 ease-in-out hover:bg-transparent hover:text-mainTextColor border-[1px] border-white hover:border-mainColor border-solid shadow-2xl'>
               Find out more
-            </div>
+            </a>
             <div className='flex justify-center items-center gap-5 cursor-pointer'>
-              <div className='p-[20px] bg-mainColor rounded-full'>
-                <PlayArrowIcon sx={{ color: "white" }} />
-              </div>
-              <span className='text-[17px] text-[#686D77]'>Play Demo</span>
             </div>
           </div>
         </div>

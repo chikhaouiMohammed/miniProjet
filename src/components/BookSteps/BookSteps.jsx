@@ -65,7 +65,7 @@ function BookSteps() {
                     {/* info */}
                     <div className='text-[#84829A] py-[26px]'>
                         <h3 className='text-black text-base font-medium'>Trip To Tlemcen</h3>
-                        <span>14-29 June |   by Ibis</span>
+                        <span>14-31 May |   by Ibis</span>
                         <div className='flex justify-start items-center gap-3'>
                             <div className='bg-[#F5F5F5] p-[10px] rounded-full'><img src={firstIcon} alt="" /></div>
                             <div className='bg-[#F5F5F5]  rounded-full'><img src={secondIcon} alt="" /></div>
@@ -73,7 +73,7 @@ function BookSteps() {
                         </div>
                         <div className='flex justify-start items-center gap-3'>
                             <div><img src={fourthIcon} alt="" /></div>
-                            <span>24 hotel exist</span>
+                            <span>3 hotel exist</span>
                         </div>
                     </div>
                 </motion.div>

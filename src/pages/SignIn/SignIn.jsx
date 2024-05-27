@@ -11,7 +11,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { adminRoute, hotelOwnerRoute, hotelSearchRoute, secreterRoute } from '../../Routes';
 import { AuthContext } from '../../context/AuthContext';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import imglogin from '../../assets/1698.png_860.png'
+import imglogin from '../../assets/IMG-20240526-WA0025.jpg'
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [secEmail, setSecEmail] = useState('');

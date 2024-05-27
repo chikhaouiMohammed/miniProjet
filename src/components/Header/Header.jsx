@@ -9,7 +9,7 @@ function  Header() {
     
 
     return (
-        <header className='container mx-auto px-[40px] font-poppins flex justify-between items-center py-[50px] text-mainTextColor'>
+        <header className='container h-[100px] overflow-hidden mx-auto px-[40px] font-poppins flex justify-between items-center py-[50px] text-mainTextColor'>
             {/* Logo */}
             <div className='w-[250px] cursor-pointer'><img className='w-full h-full' src={logo} alt="" /></div>
 

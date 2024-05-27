@@ -275,7 +275,7 @@ const Secretaire = () => {
     
       <div className="datatable">
         <div className="datatableTitle">
-          vew all Users
+          vew last 10 clients
           <Link state={{email: hotelEmail}} to="/secreter/new-user" className="link">
             Add New
           </Link>

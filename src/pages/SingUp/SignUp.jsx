@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import {  createUserWithEmailAndPassword } from 'firebase/auth';
-import imglogin1 from '../../assets/1698.png_860.png'
+import imglogin1 from '../../assets/IMG-20240526-WA0025.jpg'
 import { FcGoogle } from "react-icons/fc";
 import { TfiEmail } from "react-icons/tfi";
 import { RiLockPasswordLine } from "react-icons/ri";

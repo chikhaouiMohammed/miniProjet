@@ -281,12 +281,6 @@ return (
                             </LocalizationProvider>
                             </div>
                         </div>
-                        <div className='flex flex-col items-start justify-start mt-6 gap-2 '>
-                            <span className='text-[#565656] text-sm ml-2'>You Will Stay 4 Nights </span>
-                            <span  className='text-[#565656] text-sm ml-2'>You Selected 2 Rooms For :</span>
-                            <span  className='text-[#565656] text-sm ml-2'> 2 Adults</span>   
-                            <span  className='text-[#565656] text-sm ml-2'> 3 Children</span>   
-                        </div>
                     </div>
                     </div>
                     {/*payment*/}
@@ -313,7 +307,7 @@ return (
                             <h2 className='text-2xl font-bold mt-10 '>Pay part now, part later </h2>
                             <input type="radio" className='w-5 h-5 mt-8'/>
                         </div> 
-                        <p className='text-sm font-normal mt-4'>Pay $ 200 now, and the rest ($6,60) will be automatically charged <br />
+                        <p className='text-sm font-normal mt-4'>Pay 5000DA now, and the rest (1200DA) will be automatically charged <br />
                             to the same payment method on August 27, 2023. No extra fees.</p>
                     </div>
                     </div>

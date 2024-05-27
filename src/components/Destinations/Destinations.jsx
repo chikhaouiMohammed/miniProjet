@@ -35,11 +35,11 @@ function Destinations() {
           <div className="absolute bottom-0 left-0 right-0 pt-[27px] pb-[42px] px-[20px] flex flex-col justify-between items-center text-[#5E6282] bg-white z-30"> 
             <div className='w-full flex justify-between items-center'>
                 <h4>ibis</h4>
-                <span>$200</span>
+                <span>5000DA</span>
             </div>
             <div className='w-full flex justify-start items-center gap-[14px] mt-[19px]'>
                 <div className=' text-black'><NearMeIcon/></div>
-                <div>10 Days Trip</div>
+                <div>Days Trip</div>
             </div>
           </div>
         </motion.div>
@@ -51,11 +51,11 @@ function Destinations() {
           <div className="absolute bottom-0 left-0 right-0 pt-[27px] pb-[42px] px-[20px] flex flex-col justify-between items-center text-[#5E6282] bg-white z-30"> 
             <div className='w-full flex justify-between items-center'>
                 <h4>Renissence</h4>
-                <span>$200</span>
+                <span>15000DA</span>
             </div>
             <div className='w-full flex justify-start items-center gap-[14px] mt-[19px]'>
                 <div className=' text-black'><NearMeIcon/></div>
-                <div>10 Days Trip</div>
+                <div>Days Trip</div>
             </div>
           </div>
         </motion.div>
@@ -67,11 +67,11 @@ function Destinations() {
           <div className="absolute bottom-0 left-0 right-0 pt-[27px] pb-[42px] px-[20px] flex flex-col justify-between items-center text-[#5E6282] bg-white z-30"> 
             <div className='w-full flex justify-between items-center'>
                 <h4>Zianides</h4>
-                <span>$350</span>
+                <span>5500DA</span>
             </div>
             <div className='w-full flex justify-start items-center gap-[14px] mt-[19px]'>
                 <div className=' text-black'><NearMeIcon/></div>
-                <div>10 Days Trip</div>
+                <div>Days Trip</div>
             </div>
           </div>
         </motion.div>
