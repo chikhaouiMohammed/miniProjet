@@ -199,9 +199,9 @@ const HotelProfile = () => {
             {/* You can render the rating based on hotelData.rating */}
             <input type="radio" name="rating-2" className="mask mask-star-2 bg-orange-400" />
             <input type="radio" name="rating-2" className="mask mask-star-2 bg-orange-400" />
-            <input type="radio" name="rating-2" className="mask mask-star-2 bg-orange-400" defaultChecked />
+            <input type="radio" name="rating-2" className="mask mask-star-2 bg-orange-400"  />
             <input type="radio" name="rating-2" className="mask mask-star-2 bg-orange-400" />
-            <input type="radio" name="rating-2" className="mask mask-star-2 bg-orange-400" />
+            <input type="radio" name="rating-2" className="mask mask-star-2 bg-orange-400" defaultChecked/>
           </div>
           {/* description */}
           <h3 className="text-3xl font-semibold">Description:</h3>

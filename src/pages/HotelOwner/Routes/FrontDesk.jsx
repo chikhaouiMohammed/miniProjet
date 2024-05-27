@@ -129,7 +129,7 @@ const updateHotelData = async () => {
 };
 */
 
-
+/*
 const updateHotelData = async () => {
   try {
     // Get the new secretaire email and password from the input fields
@@ -161,6 +161,60 @@ const updateHotelData = async () => {
     };
 
     // Update the secretaire map inside the hotel user document
+    await setDoc(hotelUserRef, {
+      secretaire: newSecretaireData
+    }, { merge: true });
+
+    // Ensure hotelInfo.secretaires is an array
+    if (!Array.isArray(hotelInfo.secretaires)) {
+      hotelInfo.secretaires = [];
+    }
+
+    // Update the hotel data in the hotelList collection
+    const hotelRef = doc(db, 'hotelList', 'Tlemcen', 'hotels', email);
+    await setDoc(hotelRef, {
+      ...hotelInfo,
+      About: document.getElementById('aboutTextarea').value, // Get the value of the about textarea
+      Policy: document.getElementById('policyTextarea').value, // Get the value of the policy textarea
+      // Add the new secretaire email to the list of secretaires
+      secretaires: [...hotelInfo.secretaires, secretaireEmail]
+    }, { merge: true }); // Merge the new data with existing data instead of overwriting
+
+    console.log('Hotel data updated successfully with new secretaire!');
+  } catch (error) {
+    console.error('Error updating hotel data:', error);
+  }
+};
+*/
+const updateHotelData = async () => {
+  try {
+    // Get the new secretaire email and password from the input fields
+    const secretaireEmail = document.getElementById('secretaireEmailInput').value;
+    const secretairePassword = document.getElementById('secretairePasswordInput').value;
+
+    // Ensure the secretaire email and password are provided
+    if (!secretaireEmail || !secretairePassword) {
+      console.error('Secretaire email and password are required');
+      return;
+    }
+
+    // Reference to the specific hotel user document
+    const hotelUserRef = doc(db, 'hotelUsers', email);
+
+    // Fetch the current data
+    const hotelUserDoc = await getDoc(hotelUserRef);
+    if (!hotelUserDoc.exists()) {
+      console.error('Hotel user document not found');
+      return;
+    }
+
+    // Prepare the new secretaire data
+    const newSecretaireData = {
+      email: secretaireEmail,
+      password: secretairePassword
+    };
+
+    // Update the secretaire field inside the hotel user document
     await setDoc(hotelUserRef, {
       secretaire: newSecretaireData
     }, { merge: true });
